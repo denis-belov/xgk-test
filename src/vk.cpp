@@ -322,6 +322,15 @@ void initVK (void) {
 		// cout << vk_inst.physical_devices << endl;
 
 		VkPhysicalDevice vk_physical_device = vk_inst.physical_devices[0];
+		VkPhysicalDeviceProperties pProperties = {};
+		vkGetPhysicalDeviceProperties(vk_physical_device, &pProperties);
+		cout << vk_inst.physical_device_count << endl;
+		cout << pProperties.apiVersion << endl;
+		cout << pProperties.driverVersion << endl;
+		cout << pProperties.vendorID << endl;
+		cout << pProperties.deviceID << endl;
+		cout << pProperties.deviceType << endl;
+		cout << pProperties.deviceName << endl;
 
 		#if defined(__linux__)
 
@@ -344,8 +353,8 @@ void initVK (void) {
 			queue_ci.push_back(DevQueueCI(vk_dev.present_queue_family_index, 1, &queue_priorities));
 		}
 
-		// cout << "G " << vk_dev.graphics_queue_family_index << endl;
-		// cout << "P " <<  vk_dev.present_queue_family_index << endl;
+		cout << "G " << vk_dev.graphics_queue_family_index << endl;
+		cout << "P " <<  vk_dev.present_queue_family_index << endl;
 
 		vk_dev.create(vk_physical_device, vk_dev.graphics_queue_family_index != vk_dev.present_queue_family_index ? 2 : 1, queue_ci.data(), 0, nullptr, 1, vk_dev_exts);
 

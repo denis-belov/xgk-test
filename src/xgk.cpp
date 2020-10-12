@@ -11,6 +11,11 @@
 #include <mutex>
 #include <chrono>
 
+#if defined(_WIN64)
+
+	#include <windows.h>
+#endif
+
 #include "GLFW/glfw3.h"
 
 #include "xgk-math/src/data/data.h"
@@ -201,6 +206,7 @@ namespace TIME {
 
 
 
+	// rename to getFramerate
 	void getFrameTime (Time* time) {
 
 		time->frames++;
@@ -216,8 +222,16 @@ namespace TIME {
 
 			time->last_seconds = time->now_seconds;
 
-			// printf("\x1B[32mFPS: %f                           \e[?25l\x1B[0m\r", 1.0f / (((float) time->frame_time) * 0.000001f));
-			printf("\x1B[32mFPS: %lu                           \e[?25l\x1B[0m\r", time->frames);
+			// printf("\x1B[32mFPS: %f                                \e[?25l\x1B[0m\r", 1.0f / (((float) time->frame_time) * 0.000001f));
+
+			#if defined(__linux__)
+
+				printf("\x1B[32mFPS: %llu                            \e[?25l\x1B[0m\r", time->frames);
+			#else
+
+				printf("\x1B[32mFPS: %llu                            \x1B[0m\r", time->frames);
+			#endif
+
 			fflush(stdout);
 
 			time->frames = 0;
@@ -487,6 +501,23 @@ void glfw_error_callback (int error, const char* description) {
 
 
 int main (void) {
+
+	// hiding cursor
+	#if defined(_WIN64)
+
+		{
+			HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
+			CONSOLE_CURSOR_INFO console_cursor_info;
+
+			console_cursor_info.bVisible = FALSE;
+			console_cursor_info.dwSize = 1;
+
+			SetConsoleCursorInfo(console, &console_cursor_info);
+		}
+	#endif
+	//
+
+
 
 	XGK::DATA::VEC4::simd32();
 	XGK::DATA::QUAT::simd32();
