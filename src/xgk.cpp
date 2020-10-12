@@ -11,11 +11,21 @@
 #include <mutex>
 #include <chrono>
 
-#include "glfw-3.3.2/include/GLFW/glfw3.h"
+#include "GLFW/glfw3.h"
 
 #include "xgk-math/src/data/data.h"
 #include "xgk-math/src/object/object.h"
 #include "xgk-math/src/util/util.h"
+
+
+
+namespace XGK {
+
+	namespace DATA {
+
+		extern const uint8_t FLOAT_SIZE_4;
+	};
+};
 
 
 
@@ -478,7 +488,9 @@ void glfw_error_callback (int error, const char* description) {
 
 int main (void) {
 
-	XGK::DATA::simd32();
+	XGK::DATA::VEC4::simd32();
+	XGK::DATA::QUAT::simd32();
+	XGK::DATA::MAT4::simd32();
 
 	XGK::DATA::MAT4::ident(&orbit.view_mat);
 	float orbit_trans[3] = { 0.0, 0.0, 10 };
@@ -562,7 +574,7 @@ int main (void) {
 
 
 
-	std::cout << "END" << std::endl;
+	cout << "END" << endl;
 
 
 

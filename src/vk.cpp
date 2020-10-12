@@ -20,8 +20,8 @@
 	#include <Windows.h>
 #endif
 
-#include "glfw-3.3.2/include/GLFW/glfw3.h"
-#include "glfw-3.3.2/include/GLFW/glfw3native.h"
+#include "GLFW/glfw3.h"
+#include "GLFW/glfw3native.h"
 
 #define VK_NO_PROTOTYPES
 #include "vulkan/vulkan.h"
@@ -117,17 +117,17 @@ void loop_function_VK (void) {
   // causes validation error without crashing, has to be global static
   static uint32_t curr_image = 0;
 
-  printf("\n%i\n", curr_image);
-  // printf("command buffer -> %lu\n", vk_cmd_buffers[curr_image]);
-  printf("start -> ");
-  getTime(&_time);
+  // printf("\n%i\n", curr_image);
+  // // printf("command buffer -> %lu\n", vk_cmd_buffers[curr_image]);
+  // printf("start -> ");
+  // getTime(&_time);
 
   vkAcquireNextImageKHR(vk_dev.handle, vk_swapchain, 0xFFFFFFFF, vk_image_available_semaphores[curr_image], VK_NULL_HANDLE, &vk_image_indices[curr_image]);
 
-  printf("%i\n", vk_image_indices[curr_image]);
+  // printf("%i\n", vk_image_indices[curr_image]);
 
-  printf("vkAcquireNextImageKHR -> ");
-  getTime(&_time);
+  // printf("vkAcquireNextImageKHR -> ");
+  // getTime(&_time);
 
   static const VkCommandBufferBeginInfo vk_command_buffer_bi = CmdBufferBeginI(nullptr, VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 
@@ -135,8 +135,8 @@ void loop_function_VK (void) {
 
   vkWaitForFences(vk_dev.handle, 1, &vk_submission_completed_fences[curr_image], VK_TRUE, 0xFFFFFFFF);
 
-  printf("vkWaitForFences -> ");
-  getTime(&_time);
+  // printf("vkWaitForFences -> ");
+  // getTime(&_time);
 
   vkBeginCommandBuffer(vk_cmd_buffers[curr_image], &vk_command_buffer_bi);
 
@@ -199,27 +199,27 @@ void loop_function_VK (void) {
 
   vkResetFences(vk_dev.handle, 1, &vk_submission_completed_fences[curr_image]);
 
-  printf("vkResetFences -> ");
-  getTime(&_time);
+  // printf("vkResetFences -> ");
+  // getTime(&_time);
 
   // printf("command buffer -> %lu\n", vk_submit_i[curr_image].pCommandBuffers[0]);
 
   vkQueueSubmit(vk_graphics_queue, 1, &vk_submit_i[curr_image], vk_submission_completed_fences[curr_image]);
 
-  printf("vkQueueSubmit -> ");
-  getTime(&_time);
+  // printf("vkQueueSubmit -> ");
+  // getTime(&_time);
 
   vk_present_i[curr_image].pImageIndices = &vk_image_indices[curr_image];
 
   // printf("curr_image -> %i\n", vk_image_indices[curr_image]);
 
-  printf("pImageIndices -> ");
-  getTime(&_time);
+  // printf("pImageIndices -> ");
+  // getTime(&_time);
 
   vkQueuePresentKHR(vk_present_queue, &vk_present_i[curr_image]);
 
-  printf("vkQueuePresentKHR -> ");
-  getTime(&_time);
+  // printf("vkQueuePresentKHR -> ");
+  // getTime(&_time);
 
   const static uint64_t max_swapchain_image_index = vk_swapchain_image_count - 1;
 
@@ -281,12 +281,23 @@ void initVK (void) {
     // base vulkan
 
     #ifdef DEBUG
+      
+      #if defined(__linux__)
 
-      // const char* vk_inst_exts[] = { "VK_KHR_surface", "VK_KHR_win32_surface", VK_EXT_DEBUG_REPORT_EXTENSION_NAME };
-      const char* vk_inst_exts[] = { "VK_KHR_surface", "VK_KHR_xlib_surface", VK_EXT_DEBUG_REPORT_EXTENSION_NAME };
+        const char* vk_inst_exts[] = { "VK_KHR_surface", "VK_KHR_xlib_surface", VK_EXT_DEBUG_REPORT_EXTENSION_NAME };
+      #else
+
+        const char* vk_inst_exts[] = { "VK_KHR_surface", "VK_KHR_win32_surface", VK_EXT_DEBUG_REPORT_EXTENSION_NAME };
+      #endif
     #else
 
-      const char* vk_inst_exts[] = { "VK_KHR_surface", "VK_KHR_xlib_surface" };
+      #if defined(__linux__)
+
+        const char* vk_inst_exts[] = { "VK_KHR_surface", "VK_KHR_xlib_surface" };
+      #else
+
+        const char* vk_inst_exts[] = { "VK_KHR_surface", "VK_KHR_win32_surface" };
+      #endif
     #endif
 
     VkApplicationInfo app_i = AppI();
@@ -305,8 +316,13 @@ void initVK (void) {
 
     VkPhysicalDevice vk_physical_device = vk_inst.physical_devices[0];
 
-    // vk_surf = vk_inst.SurfaceKHR(GetModuleHandle(nullptr), glfwGetWin32Window(window));
-		vk_surf = vk_inst.SurfaceKHR(glfwGetX11Display(), glfwGetX11Window(window));
+    #if defined(__linux__)
+
+      vk_surf = vk_inst.SurfaceKHR(glfwGetX11Display(), glfwGetX11Window(window));
+    #else
+
+      vk_surf = vk_inst.SurfaceKHR(GetModuleHandle(nullptr), glfwGetWin32Window(window));
+    #endif
 
     const char* vk_dev_exts[] = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
