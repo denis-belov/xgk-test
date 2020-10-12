@@ -34,8 +34,15 @@
 // #include "examples/imgui_impl_vulkan.h"
 // //
 
-#include "c-test/xgk/build/gnu-x64/h/vertex_shader_code_vulkan.h"
-#include "c-test/xgk/build/gnu-x64/h/fragment_shader_code_vulkan.h"
+#if defined(__GNUC__) || defined(__GNUG__)
+
+	#include "xgk-test/build/gnu-x64/h/vertex_shader_code_vulkan.h"
+	#include "xgk-test/build/gnu-x64/h/fragment_shader_code_vulkan.h"
+#else
+
+	#include "xgk-test/build/msvs-x64/h/vertex_shader_code_vulkan.h"
+	#include "xgk-test/build/msvs-x64/h/fragment_shader_code_vulkan.h"
+#endif
 
 
 
