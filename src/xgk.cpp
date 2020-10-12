@@ -411,8 +411,8 @@ void transition_thread_function (void) {
 
 	while (render_flag) {
 
-	  // XGK::TIME::getFrameTime(&time_);
-	  // TIME::updateTransitions(&_time);
+		// XGK::TIME::getFrameTime(&time_);
+		// TIME::updateTransitions(&_time);
 	}
 };
 
