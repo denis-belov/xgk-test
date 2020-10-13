@@ -68,7 +68,7 @@ namespace TIME {
 		std::chrono::time_point<std::chrono::high_resolution_clock> last_program_time;
 		uint64_t now_seconds;
 		uint64_t last_seconds;
-		uint64_t frames = 0;
+		// uint64_t frames = 0;
 		uint64_t frame_time;
 		uint64_t stack_length;
 		uint64_t stack_counter;
@@ -206,43 +206,71 @@ namespace TIME {
 
 
 
-	// rename to getFramerate
-	void getFrameTime (Time* time) {
+	void getFramerate () {
 
-		time->frames++;
+		static const std::chrono::time_point<std::chrono::high_resolution_clock> start_time = std::chrono::high_resolution_clock::now();
+		static std::chrono::time_point<std::chrono::high_resolution_clock> program_time = std::chrono::high_resolution_clock::now();
+		static uint64_t now_seconds = 0;
+		static uint64_t last_seconds = 0;
+		static uint64_t frames = 0;
 
-		time->program_time = std::chrono::high_resolution_clock::now();
-		time->frame_time = std::chrono::duration_cast<std::chrono::microseconds>(time->program_time - time->last_program_time).count();
-		time->last_program_time = time->program_time;
+		frames++;
+		program_time = std::chrono::high_resolution_clock::now();
+		now_seconds = std::chrono::duration_cast<std::chrono::seconds>(program_time - start_time).count();
 
-		// time->now_seconds = floor(((float) std::chrono::duration_cast<std::chrono::microseconds>(time->program_time - time->start_time).count()) * 0.000001f);
-		time->now_seconds = ((std::chrono::duration_cast<std::chrono::seconds>(time->program_time - time->start_time).count()));
+		if (now_seconds - last_seconds) { // > 0
 
-		if (time->now_seconds - time->last_seconds) { // > 0
-
-			time->last_seconds = time->now_seconds;
-
-			// printf("\x1B[32mFPS: %f                                \e[?25l\x1B[0m\r", 1.0f / (((float) time->frame_time) * 0.000001f));
+			last_seconds = now_seconds;
 
 			#if defined(__linux__)
 
-				printf("\x1B[32mFPS: %llu                            \e[?25l\x1B[0m\r", time->frames);
+				printf("\x1B[32mFPS: %llu                            \e[?25l\x1B[0m\r", frames);
 			#else
 
-				printf("\x1B[32mFPS: %llu                            \x1B[0m\r", time->frames);
+				printf("\x1B[32mFPS: %llu                            \x1B[0m\r", frames);
 			#endif
 
 			fflush(stdout);
 
-			time->frames = 0;
+			frames = 0;
+		}
+	};
+
+
+
+	void getAverageFrametime () {
+
+		static std::chrono::time_point<std::chrono::high_resolution_clock> start_time = std::chrono::high_resolution_clock::now();
+		static std::chrono::time_point<std::chrono::high_resolution_clock> program_time = std::chrono::high_resolution_clock::now();
+		static uint64_t now_seconds = 0;
+		static uint64_t frames = 0;
+
+		frames++;
+		program_time = std::chrono::high_resolution_clock::now();
+		now_seconds = std::chrono::duration_cast<std::chrono::seconds>(program_time - start_time).count();
+
+		if (now_seconds) { // > 0
+
+			#if defined(__linux__)
+
+				printf("\x1B[32mAverage frametime: %fs                            \e[?25l\x1B[0m\r", (double) now_seconds / ((double) frames));
+			#else
+
+				printf("\x1B[32mAverage frametime: %fs                            \x1B[0m\r", (double) now_seconds / ((double) frames));
+			#endif
+
+			fflush(stdout);
+
+			start_time = std::chrono::high_resolution_clock::now();
+			program_time = std::chrono::high_resolution_clock::now();
+			now_seconds = 0;
+			frames = 0;
 		}
 	};
 
 
 
 	void getTime (Time* time) {
-
-		time->frames++;
 
 		time->program_time = std::chrono::high_resolution_clock::now();
 		time->_time = std::chrono::duration_cast<std::chrono::microseconds>(time->program_time - time->last_program_time).count();
@@ -425,7 +453,7 @@ void transition_thread_function (void) {
 
 	while (render_flag) {
 
-		// XGK::TIME::getFrameTime(&time_);
+		// XGK::TIME::getFramerate(&time_);
 		// TIME::updateTransitions(&_time);
 	}
 };
@@ -579,7 +607,8 @@ int main (void) {
 
 		glfwPollEvents();
 
-		getFrameTime(&_time);
+		TIME::getFramerate();
+		TIME::getAverageFrametime();
 
 		// orbit_mutex.lock();
 

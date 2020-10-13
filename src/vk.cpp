@@ -28,11 +28,11 @@
 
 #include "xgk-aux/src/api/vulkan.h"
 
-// // GUI
-// #include "imgui.h"
-// #include "examples/imgui_impl_glfw.h"
-// #include "examples/imgui_impl_vulkan.h"
-// //
+// GUI
+#include "imgui.h"
+#include "examples/imgui_impl_glfw.h"
+#include "examples/imgui_impl_vulkan.h"
+//
 
 #if defined(__GNUC__) || defined(__GNUG__)
 
@@ -99,10 +99,10 @@ VkBuffer vk_vertex_buffer = VK_NULL_HANDLE;
 
 
 
-// // GUI
-// VkDescriptorPool g_DescriptorPool = VK_NULL_HANDLE;
-// ImGui_ImplVulkanH_Window g_MainWindowData;
-// //
+// GUI
+VkDescriptorPool g_DescriptorPool = VK_NULL_HANDLE;
+ImGui_ImplVulkanH_Window g_MainWindowData;
+//
 
 
 
@@ -124,17 +124,7 @@ void loop_function_VK (void) {
 	// causes validation error without crashing, has to be global static
 	static uint32_t curr_image = 0;
 
-	// printf("\n%i\n", curr_image);
-	// // printf("command buffer -> %lu\n", vk_cmd_buffers[curr_image]);
-	// printf("start -> ");
-	// getTime(&_time);
-
 	vkAcquireNextImageKHR(vk_dev.handle, vk_swapchain, 0xFFFFFFFF, vk_image_available_semaphores[curr_image], VK_NULL_HANDLE, &vk_image_indices[curr_image]);
-
-	// printf("%i\n", vk_image_indices[curr_image]);
-
-	// printf("vkAcquireNextImageKHR -> ");
-	// getTime(&_time);
 
 	static const VkCommandBufferBeginInfo vk_command_buffer_bi = CmdBufferBeginI(nullptr, VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 
@@ -142,91 +132,69 @@ void loop_function_VK (void) {
 
 	vkWaitForFences(vk_dev.handle, 1, &vk_submission_completed_fences[curr_image], VK_TRUE, 0xFFFFFFFF);
 
-	// printf("vkWaitForFences -> ");
-	// getTime(&_time);
-
 	vkBeginCommandBuffer(vk_cmd_buffers[curr_image], &vk_command_buffer_bi);
 
 
 
 	// GUI
-	// extern uint8_t gui_g;
+	extern uint8_t gui_g;
 
-	// if (gui_g) {
+	if (gui_g) {
 
-	//   vkCmdBeginRenderPass(vk_cmd_buffers[curr_image], &vk_render_pass_bi[curr_image], VK_SUBPASS_CONTENTS_INLINE);
+	  vkCmdBeginRenderPass(vk_cmd_buffers[curr_image], &vk_render_pass_bi[curr_image], VK_SUBPASS_CONTENTS_INLINE);
 
-	//   ImGui_ImplVulkan_NewFrame();
-	//   ImGui_ImplGlfw_NewFrame();
-	//   ImGui::NewFrame();
+	  ImGui_ImplVulkan_NewFrame();
+	  ImGui_ImplGlfw_NewFrame();
+	  ImGui::NewFrame();
 
-	//   {
-	//       static float f = 0.0f;
-	//       static int counter = 0;
+	  {
+	      static float f = 0.0f;
+	      static int counter = 0;
 
-	//       ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+	      ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
 
-	//       ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-	//       // ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-	//       // ImGui::Checkbox("Another Window", &show_another_window);
+	      ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
+	      // ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
+	      // ImGui::Checkbox("Another Window", &show_another_window);
 
-	//       ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-	//       // ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+	      ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+	      // ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
 
-	//       if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-	//           counter++;
-	//       ImGui::SameLine();
-	//       ImGui::Text("counter = %d", counter);
+	      if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+	          counter++;
+	      ImGui::SameLine();
+	      ImGui::Text("counter = %d", counter);
 
-	//       // ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-	//       ImGui::End();
-	//   }
+	      // ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+	      ImGui::End();
+	  }
 
-	//   ImGui::Render();
-	//   ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), vk_cmd_buffers[curr_image]);
-	// }
-	// //
+	  ImGui::Render();
+	  ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), vk_cmd_buffers[curr_image]);
+	}
+	//
 
-	// else {
+	else {
 
 		vkCmdBindDescriptorSets(vk_cmd_buffers[curr_image], VK_PIPELINE_BIND_POINT_GRAPHICS, vk_ppl_layout, 0, 1, &vk_descr_set[0], 0, nullptr);
 		vkCmdBindVertexBuffers(vk_cmd_buffers[curr_image], 0, 1, &vk_vertex_buffer, &vk_vertex_buffer_offset);
 		vkCmdBeginRenderPass(vk_cmd_buffers[curr_image], &vk_render_pass_bi[curr_image], VK_SUBPASS_CONTENTS_INLINE);
 		vkCmdBindPipeline(vk_cmd_buffers[curr_image], VK_PIPELINE_BIND_POINT_GRAPHICS, vk_ppl);
 		vkCmdDraw(vk_cmd_buffers[curr_image], vertices_size / 12, 1, 0, 0);
-	// }
+	}
 
 
 
 	vkCmdEndRenderPass(vk_cmd_buffers[curr_image]);
 	vkEndCommandBuffer(vk_cmd_buffers[curr_image]);
 
-	// printf("vkEndCommandBuffer -> ");
-	// getTime(&_time);
-
 	vkResetFences(vk_dev.handle, 1, &vk_submission_completed_fences[curr_image]);
-
-	// printf("vkResetFences -> ");
-	// getTime(&_time);
-
-	// printf("command buffer -> %lu\n", vk_submit_i[curr_image].pCommandBuffers[0]);
 
 	vkQueueSubmit(vk_graphics_queue, 1, &vk_submit_i[curr_image], vk_submission_completed_fences[curr_image]);
 
-	// printf("vkQueueSubmit -> ");
-	// getTime(&_time);
-
 	vk_present_i[curr_image].pImageIndices = &vk_image_indices[curr_image];
 
-	// printf("curr_image -> %i\n", vk_image_indices[curr_image]);
-
-	// printf("pImageIndices -> ");
-	// getTime(&_time);
-
 	vkQueuePresentKHR(vk_present_queue, &vk_present_i[curr_image]);
-
-	// printf("vkQueuePresentKHR -> ");
-	// getTime(&_time);
 
 	const static uint64_t max_swapchain_image_index = vk_swapchain_image_count - 1;
 
@@ -244,11 +212,11 @@ void destroyVK (void) {
 
 
 
-	// // GUI
-	// ImGui_ImplVulkan_Shutdown();
-	// ImGui_ImplGlfw_Shutdown();
-	// ImGui::DestroyContext();
-	// //
+	// GUI
+	ImGui_ImplVulkan_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
+	//
 
 
 
@@ -760,71 +728,71 @@ void initVK (void) {
 
 
 
-		// // GUI
-		// IMGUI_CHECKVERSION();
-		// ImGui::CreateContext();
-		// ImGui::StyleColorsDark();
+		// GUI
+		IMGUI_CHECKVERSION();
+		ImGui::CreateContext();
+		ImGui::StyleColorsDark();
 
-		// // Create Descriptor Pool
-		// {
-		//     VkDescriptorPoolSize pool_sizes[] =
-		//     {
-		//         { VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
-		//         { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
-		//         { VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },
-		//         { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000 },
-		//         { VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000 },
-		//         { VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000 },
-		//         { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
-		//         { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
-		//         { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000 },
-		//         { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
-		//         { VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 }
-		//     };
-		//     VkDescriptorPoolCreateInfo pool_info = {};
-		//     pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-		//     pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
-		//     pool_info.maxSets = 1000 * IM_ARRAYSIZE(pool_sizes);
-		//     pool_info.poolSizeCount = (uint32_t)IM_ARRAYSIZE(pool_sizes);
-		//     pool_info.pPoolSizes = pool_sizes;
-		//     vkCreateDescriptorPool(vk_dev.handle, &pool_info, nullptr, &g_DescriptorPool);
-		// }
+		// Create Descriptor Pool
+		{
+		    VkDescriptorPoolSize pool_sizes[] =
+		    {
+		        { VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
+		        { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
+		        { VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },
+		        { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000 },
+		        { VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000 },
+		        { VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000 },
+		        { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
+		        { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
+		        { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000 },
+		        { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
+		        { VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 }
+		    };
+		    VkDescriptorPoolCreateInfo pool_info = {};
+		    pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+		    pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+		    pool_info.maxSets = 1000 * IM_ARRAYSIZE(pool_sizes);
+		    pool_info.poolSizeCount = (uint32_t)IM_ARRAYSIZE(pool_sizes);
+		    pool_info.pPoolSizes = pool_sizes;
+		    vkCreateDescriptorPool(vk_dev.handle, &pool_info, nullptr, &g_DescriptorPool);
+		}
 
-		// // Setup Platform/Renderer bindings
-		// ImGui_ImplGlfw_InitForVulkan(window, true);
-		// ImGui_ImplVulkan_InitInfo init_info = {};
-		// init_info.Instance = vk_inst.handle;
-		// init_info.PhysicalDevice = vk_physical_device;
-		// init_info.Device = vk_dev.handle;
-		// init_info.QueueFamily = vk_dev.graphics_queue_family_index;
-		// init_info.Queue = vk_graphics_queue;
-		// init_info.DescriptorPool = g_DescriptorPool;
-		// init_info.MinImageCount = 3;
-		// init_info.ImageCount = 3;
-		// init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
-		// ImGui_ImplVulkan_Init(&init_info, vk_render_pass);
+		// Setup Platform/Renderer bindings
+		ImGui_ImplGlfw_InitForVulkan(window, true);
+		ImGui_ImplVulkan_InitInfo init_info = {};
+		init_info.Instance = vk_inst.handle;
+		init_info.PhysicalDevice = vk_physical_device;
+		init_info.Device = vk_dev.handle;
+		init_info.QueueFamily = vk_dev.graphics_queue_family_index;
+		init_info.Queue = vk_graphics_queue;
+		init_info.DescriptorPool = g_DescriptorPool;
+		init_info.MinImageCount = 3;
+		init_info.ImageCount = 3;
+		init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+		ImGui_ImplVulkan_Init(&init_info, vk_render_pass);
 
-		// // Upload Fonts
-		// {
-		//   vkResetCommandPool(vk_dev.handle, vk_cmd_pool, 0);
-		//   VkCommandBufferBeginInfo begin_info = {};
-		//   begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-		//   begin_info.flags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-		//   vkBeginCommandBuffer(vk_cmd_buffers[0], &begin_info);
+		// Upload Fonts
+		{
+		  vkResetCommandPool(vk_dev.handle, vk_cmd_pool, 0);
+		  VkCommandBufferBeginInfo begin_info = {};
+		  begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+		  begin_info.flags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+		  vkBeginCommandBuffer(vk_cmd_buffers[0], &begin_info);
 
-		//   ImGui_ImplVulkan_CreateFontsTexture(vk_cmd_buffers[0]);
+		  ImGui_ImplVulkan_CreateFontsTexture(vk_cmd_buffers[0]);
 
-		//   VkSubmitInfo end_info = {};
-		//   end_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-		//   end_info.commandBufferCount = 1;
-		//   end_info.pCommandBuffers = &vk_cmd_buffers[0];
-		//   vkEndCommandBuffer(vk_cmd_buffers[0]);
-		//   vkQueueSubmit(vk_graphics_queue, 1, &end_info, VK_NULL_HANDLE);
+		  VkSubmitInfo end_info = {};
+		  end_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+		  end_info.commandBufferCount = 1;
+		  end_info.pCommandBuffers = &vk_cmd_buffers[0];
+		  vkEndCommandBuffer(vk_cmd_buffers[0]);
+		  vkQueueSubmit(vk_graphics_queue, 1, &end_info, VK_NULL_HANDLE);
 
-		//   vkDeviceWaitIdle(vk_dev.handle);
-		//   ImGui_ImplVulkan_DestroyFontUploadObjects();
-		// }
-		// //
+		  vkDeviceWaitIdle(vk_dev.handle);
+		  ImGui_ImplVulkan_DestroyFontUploadObjects();
+		}
+		//
 
 
 
