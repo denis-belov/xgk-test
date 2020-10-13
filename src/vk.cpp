@@ -34,7 +34,7 @@
 #include "examples/imgui_impl_vulkan.h"
 //
 
-#if defined(__GNUC__) || defined(__GNUG__)
+#if defined(__GNUC__)
 
 	#include "xgk-test/build/gnu-x64/h/vertex_shader_code_vulkan.h"
 	#include "xgk-test/build/gnu-x64/h/fragment_shader_code_vulkan.h"
@@ -260,7 +260,7 @@ void initVK (void) {
 			#if defined(__linux__)
 
 				const char* vk_inst_exts[] = { "VK_KHR_surface", "VK_KHR_xlib_surface", VK_EXT_DEBUG_REPORT_EXTENSION_NAME };
-			#else
+			#elif defined(_WIN64)
 
 				const char* vk_inst_exts[] = { "VK_KHR_surface", "VK_KHR_win32_surface", VK_EXT_DEBUG_REPORT_EXTENSION_NAME };
 			#endif
@@ -269,7 +269,7 @@ void initVK (void) {
 			#if defined(__linux__)
 
 				const char* vk_inst_exts[] = { "VK_KHR_surface", "VK_KHR_xlib_surface" };
-			#else
+			#elif defined(_WIN64)
 
 				const char* vk_inst_exts[] = { "VK_KHR_surface", "VK_KHR_win32_surface" };
 			#endif
@@ -303,7 +303,7 @@ void initVK (void) {
 		#if defined(__linux__)
 
 			vk_surf = vk_inst.SurfaceKHR(glfwGetX11Display(), glfwGetX11Window(window));
-		#else
+		#elif defined(_WIN64)
 
 			vk_surf = vk_inst.SurfaceKHR(GetModuleHandle(nullptr), glfwGetWin32Window(window));
 		#endif

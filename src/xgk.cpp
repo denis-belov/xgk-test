@@ -225,7 +225,7 @@ namespace TIME {
 			#if defined(__linux__)
 
 				printf("\x1B[32mFPS: %llu                            \e[?25l\x1B[0m\r", frames);
-			#else
+			#elif defined(_WIN64)
 
 				printf("\x1B[32mFPS: %llu                            \x1B[0m\r", frames);
 			#endif
@@ -254,7 +254,7 @@ namespace TIME {
 			#if defined(__linux__)
 
 				printf("\x1B[32mAverage frametime: %fs                            \e[?25l\x1B[0m\r", (double) now_seconds / ((double) frames));
-			#else
+			#elif defined(_WIN64)
 
 				printf("\x1B[32mAverage frametime: %fs                            \x1B[0m\r", (double) now_seconds / ((double) frames));
 			#endif
