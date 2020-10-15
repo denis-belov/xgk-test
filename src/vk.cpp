@@ -119,7 +119,7 @@ extern TIME::Time _time;
 
 void loop_function_VK (void) {
 
-	// memcpy(vk_uniform_buffer_mem_addr, &orbit, 64);
+	memcpy(vk_uniform_buffer_mem_addr, &orbit, 128);
 
 	// causes validation error without crashing, has to be global static
 	static uint32_t curr_image = 0;
