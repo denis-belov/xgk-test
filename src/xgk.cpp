@@ -22,6 +22,9 @@
 #include "xgk-math/src/object/object.h"
 #include "xgk-math/src/util/util.h"
 
+#include "xgk-aux/src/transition-stack/transition-stack.h"
+#include "xgk-aux/src/transition/transition.h"
+
 
 
 namespace XGK {
@@ -40,159 +43,6 @@ using std::endl;
 
 
 namespace TIME {
-
-	void idle_function (const float) {};
-
-
-
-	struct Transition {
-
-		// revise types
-		uint8_t active;
-		uint64_t time_gone;
-		float interpolation;
-		uint64_t duration;
-		uint64_t stack_index;
-		void* additional;
-
-		void (* process_callback) (const float);
-		void (* end_callback) (const float);
-	};
-
-	struct Time {
-
-		std::vector<Transition*> stack_VECTOR;
-		Transition** stack_RANGE;
-
-		uint64_t frame_time;
-		uint64_t stack_length;
-		uint64_t stack_counter;
-
-		Transition** stack;
-	};
-
-
-
-	void init (Time* time, const uint64_t stack_max_size) {
-
-		time->frame_time = 0;
-
-		time->stack_length = 0;
-		time->stack_counter = 0;
-
-		time->stack_VECTOR.resize(stack_max_size);
-		time->stack_RANGE = time->stack_VECTOR.data();
-	};
-
-
-
-	// only cancels within stack execution, not for using manually
-	void cancelTransition (Time* time, Transition* transition) {
-
-		transition->active = 0;
-		// transition->duration = 0;
-
-		time->stack_RANGE[time->stack_counter--] = time->stack_RANGE[--time->stack_length];
-		time->stack_RANGE[time->stack_length] = nullptr;
-	};
-
-
-
-	void cancelTransition2 (Time* time, Transition* transition) {
-
-		if (transition->active) {
-
-			transition->active = 0;
-
-			time->stack_RANGE[transition->stack_index] = time->stack_RANGE[--time->stack_length];
-			time->stack_RANGE[time->stack_length] = nullptr;
-		}
-	};
-
-
-
-	void startTransition (
-
-		Time* time,
-		Transition* transition,
-		uint64_t duration,
-		void (* process_callback) (const float)
-	) {
-
-		cancelTransition2(time, transition);
-
-		transition->interpolation = 0.0f;
-		transition->duration = duration;
-		transition->process_callback = process_callback;
-		transition->end_callback = idle_function;
-		transition->time_gone = 0;
-		transition->active = 1;
-		transition->stack_index = time->stack_length;
-
-		time->stack_RANGE[time->stack_length] = transition;
-
-		++time->stack_length;
-	};
-
-
-
-	void startTransition2 (
-		Time* time,
-		Transition* transition,
-		uint64_t duration,
-		void (* process_callback) (const float),
-		void (* end_callback) (const float)
-	) {
-
-		cancelTransition2(time, transition);
-
-		transition->interpolation = 0.0f;
-		transition->duration = duration;
-		transition->process_callback = process_callback;
-		transition->end_callback = end_callback;
-		transition->time_gone = 0;
-		transition->active = 1;
-		transition->stack_index = time->stack_length;
-
-		time->stack_RANGE[time->stack_length++] = transition;
-	};
-
-
-
-	void updateTransition (Time* time, Transition* transition) {
-
-		transition->interpolation = ((float) transition->time_gone) / ((float) transition->duration);
-
-		// cout << ((int) (transition->time_gone >= transition->duration)) << " " << ((int) (transition->interpolation >= 1.0f)) << endl;
-
-		if (transition->time_gone >= transition->duration) {
-		// if (transition->interpolation >= 1.0f) {
-
-			cancelTransition(time, transition);
-
-			transition->end_callback(transition->interpolation);
-		}
-		else {
-
-			transition->time_gone += time->frame_time;
-
-			transition->process_callback(transition->interpolation);
-		}
-	};
-
-
-
-	void updateTransitions (Time* time) {
-
-		for (time->stack_counter = 0; time->stack_RANGE[time->stack_counter]; time->stack_counter++) {
-
-			updateTransition(time, time->stack_RANGE[time->stack_counter]);
-		}
-
-		// cout << time->stack_counter << endl;
-	};
-
-
 
 	void getFramerate () {
 
@@ -224,8 +74,6 @@ namespace TIME {
 		}
 	};
 
-
-
 	void getAverageFrametime () {
 
 		static std::chrono::time_point<std::chrono::system_clock> start_time = std::chrono::system_clock::now();
@@ -256,8 +104,6 @@ namespace TIME {
 		}
 	};
 
-
-
 	// void getTime (Time* time) {
 
 	// 	time->program_time = std::chrono::system_clock::now();
@@ -270,15 +116,13 @@ namespace TIME {
 	// 	printf("%f\n", time->_time);
 	// };
 
-
-
-	void calculateFrametime (Time* time) {
+	void calculateFrametime (uint64_t* frame_time) {
 
 		static std::chrono::time_point<std::chrono::system_clock> program_time;
 		static std::chrono::time_point<std::chrono::system_clock> last_program_time;
 
 		program_time = std::chrono::system_clock::now();
-		time->frame_time = std::chrono::duration_cast<std::chrono::nanoseconds>(program_time - last_program_time).count();
+		*frame_time = std::chrono::duration_cast<std::chrono::nanoseconds>(program_time - last_program_time).count();
 		last_program_time = program_time;
 	};
 };
@@ -295,38 +139,43 @@ namespace ORBIT {
 
 		alignas(8) XGK::Object object;
 
-		alignas(4) float speed_x;
+		alignas(4) float rotation_speed_x;
 
-		alignas(4) float speed_y;
+		alignas(4) float rotation_speed_y;
+
+		alignas(4) float translation_speed_x;
+
+		alignas(4) float translation_speed_y;
 
 
 
 		Orbit (void);
-
 		void rotate (void);
-
+		void translate (void);
 		void update (void);
 	};
 
-
-
 	Orbit::Orbit (void) {
 
-		speed_x = 0.0f;
-		speed_y = 0.0f;
+		rotation_speed_x = 0.0f;
+		rotation_speed_y = 0.0f;
+
+		translation_speed_x = 0.0f;
+		translation_speed_y = 0.0f;
 
 		XGK::DATA::MAT4::ident(&view_mat);
 	};
 
-
-
 	void Orbit::rotate (void) {
 
-		object.postRotX(speed_x);
-		object.preRotY(speed_y);
+		object.postRotX(rotation_speed_x);
+		object.preRotY(rotation_speed_y);
 	};
 
+	void Orbit::translate (void) {
 
+		object.transX(translation_speed_x);
+	};
 
 	void Orbit::update (void) {
 
@@ -343,14 +192,15 @@ uint8_t gui_g = 0;
 
 
 
-TIME::Time _time;
+XGK::Transition orbit_transition;
+XGK::Transition orbit_transition2;
+float curve_values[1000];
+
 ORBIT::Orbit orbit;
-TIME::Transition orbit_transition;
-float bez[1000];
 
 
 
-std::mutex orbit_mutex;
+// std::mutex orbit_mutex;
 // replace by atomic
 volatile uint8_t render_flag = 1;
 
@@ -399,29 +249,45 @@ const float* _vertices = vertices;
 
 extern const uint32_t vertices_size = sizeof(vertices);
 
+
+
 void test (const float interpolation) {
 
 	static float prev = 0.0f;
 
-  float temp = 3.14f * bez[uint64_t(interpolation * 1000.0f)];
+  float temp = 3.14f * curve_values[uint64_t(interpolation * 1000.0f)];
 
 	// Is CPU branch prediction faster than setting "end_callback"?
-	orbit.speed_x = orbit.speed_y = (temp < prev) ? temp : (temp - prev);
+	orbit.rotation_speed_x = orbit.rotation_speed_y = (temp < prev) ? temp : (temp - prev);
 
 	orbit.rotate();
 
 	prev = temp;
 };
 
+void test2 (const float interpolation) {
+
+	static float prev = 0.0f;
+
+	float temp = 3.14f * curve_values[uint64_t(interpolation * 1000.0f)];
+
+	orbit.translation_speed_x = orbit.translation_speed_y = (temp < prev) ? temp : (temp - prev);
+
+	orbit.translate();
+
+	prev = temp;
+};
 
 
-void transition_thread_function (void) {
+
+void transition_thread_function (XGK::TransitionStack* _stack) {
+
+	XGK::TransitionStack stack = *_stack;
 
 	while (render_flag) {
 
-		TIME::calculateFrametime(&_time);
-
-		TIME::updateTransitions(&_time);
+		stack.calculateFrametime();
+		stack.update();
 	}
 };
 
@@ -453,13 +319,15 @@ void glfw_key_callback (GLFWwindow* window, int key, int scancode, int action, i
 
 		if (key == GLFW_KEY_ESCAPE) {
 
-			cout << render_flag << endl;
-
 			render_flag = 0;
 		}
 		else if (key == GLFW_KEY_X) {
 
-			TIME::startTransition(&_time, &orbit_transition, 1000000000, test);
+			orbit_transition.start2(1000000000, test);
+		}
+		else if (key == GLFW_KEY_C) {
+
+			orbit_transition2.start2(1000000000, test2);
 		}
 		else if (key == GLFW_KEY_G) {
 
@@ -516,33 +384,37 @@ int main (void) {
 
 	XGK::DATA::MAT4::makeProjPersp(orbit.proj_mat, 45.0f, 800.0f / 600.0f, 1.0f, 2000.0f, 1.0f);
 
-	XGK::DATA::MAT4::print(&orbit.proj_mat);
-	XGK::DATA::MAT4::print(&orbit.view_mat);
-	XGK::DATA::MAT4::print(&orbit.object.mat);
-
 
 
 	// wrap into function
 	// vkGetPhysicalDeviceFormatProperties(vulkan_context.physical_devices[0], VK_FORMAT_R32G32B32_SFLOAT, &vulkan_context.format_props);
 	// std::cout << (vulkan_context.format_props.bufferFeatures & VK_FORMAT_FEATURE_VERTEX_BUFFER_BIT) << std::endl;
-	initGL();
+	initVK();
 
 
 
 	XGK::MATH::UTIL::makeBezierCurve3Sequence2(
 
-		bez,
+		curve_values,
 	  0,.98,0,.97,
 	  1000
 	);
 
 
 
-	std::thread transition_thread(transition_thread_function);
+	// const uint64_t thread_count = std::thread::hardware_concurrency() - 1;
+	const uint64_t thread_count = 5;
+
+	std::vector<XGK::TransitionStack*> stacks(thread_count);
+	std::vector<std::thread*> threads(thread_count);
+
+	for (uint64_t i = 0; i < thread_count; i++) {
+
+		stacks[i] = new XGK::TransitionStack(64);
+		threads[i] = new std::thread(transition_thread_function, stacks[i]);
+	}
 
 
-
-	TIME::init(&_time, 8);
 
 	while (render_flag) {
 
@@ -558,7 +430,12 @@ int main (void) {
 
 
 
-	transition_thread.join();
+	for (uint64_t i = 0; i < stacks.size(); i++) {
+
+		threads[i]->join();
+		delete threads[i];
+		delete stacks[i];
+	}
 
 
 

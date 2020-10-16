@@ -119,7 +119,7 @@ extern TIME::Time _time;
 
 void loop_function_VK (void) {
 
-	memcpy(vk_uniform_buffer_mem_addr, &orbit, 128);
+	memcpy(vk_uniform_buffer_mem_addr + 64, ((void*) &orbit) + 64, 64);
 
 	// causes validation error without crashing, has to be global static
 	static uint32_t curr_image = 0;
@@ -290,15 +290,15 @@ void initVK (void) {
 		// cout << vk_inst.physical_devices << endl;
 
 		VkPhysicalDevice vk_physical_device = vk_inst.physical_devices[0];
-		VkPhysicalDeviceProperties pProperties = {};
-		vkGetPhysicalDeviceProperties(vk_physical_device, &pProperties);
-		cout << vk_inst.physical_device_count << endl;
-		cout << pProperties.apiVersion << endl;
-		cout << pProperties.driverVersion << endl;
-		cout << pProperties.vendorID << endl;
-		cout << pProperties.deviceID << endl;
-		cout << pProperties.deviceType << endl;
-		cout << pProperties.deviceName << endl;
+		// VkPhysicalDeviceProperties pProperties = {};
+		// vkGetPhysicalDeviceProperties(vk_physical_device, &pProperties);
+		// cout << vk_inst.physical_device_count << endl;
+		// cout << pProperties.apiVersion << endl;
+		// cout << pProperties.driverVersion << endl;
+		// cout << pProperties.vendorID << endl;
+		// cout << pProperties.deviceID << endl;
+		// cout << pProperties.deviceType << endl;
+		// cout << pProperties.deviceName << endl;
 
 		#if defined(__linux__)
 
@@ -321,8 +321,8 @@ void initVK (void) {
 			queue_ci.push_back(DevQueueCI(vk_dev.present_queue_family_index, 1, &queue_priorities));
 		}
 
-		cout << "G " << vk_dev.graphics_queue_family_index << endl;
-		cout << "P " <<  vk_dev.present_queue_family_index << endl;
+		// cout << "G " << vk_dev.graphics_queue_family_index << endl;
+		// cout << "P " <<  vk_dev.present_queue_family_index << endl;
 
 		vk_dev.create(vk_physical_device, vk_dev.graphics_queue_family_index != vk_dev.present_queue_family_index ? 2 : 1, queue_ci.data(), 0, nullptr, 1, vk_dev_exts);
 

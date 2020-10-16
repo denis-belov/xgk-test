@@ -1,5 +1,5 @@
 # build and run command
-# clear && make && ~/reps/denis-belov/xgk-test/build/gnu-x64/bin/xgk
+# clear && make -f ~/reps/denis-belov/xgk-test/makefiles/gnu-x64/makefile && ~/reps/denis-belov/xgk-test/build/gnu-x64/bin/xgk
 #
 
 
@@ -19,6 +19,8 @@ BUILD=$(DIR)/build/$(BUILD_TYPE)
 XGK_MATH_BUILD=$(ROOT)/reps/denis-belov/xgk-math/build/$(BUILD_TYPE)
 
 XGK_MATH_SRC=$(ROOT)/reps/denis-belov/xgk-math/src
+
+XGK_AUX_BUILD=$(ROOT)/reps/denis-belov/xgk-aux/build/$(BUILD_TYPE)
 
 XGK_AUX_SRC=$(ROOT)/reps/denis-belov/xgk-aux/src
 
@@ -68,6 +70,7 @@ $(BUILD)/$(o)/imgui_impl_glfw.$(o) \
 $(BUILD)/$(o)/imgui_impl_opengl3.$(o) \
 $(BUILD)/$(o)/imgui_impl_vulkan.$(o) \
 $(XGK_MATH_BUILD)/$(a)/xgk-math.$(a) \
+$(XGK_AUX_BUILD)/$(a)/xgk-aux.$(a) \
 $(BUILD)/$(o)/gl.$(o) \
 $(BUILD)/$(o)/vk.$(o) \
 $(BUILD)/$(o)/xgk.$(o)
@@ -81,6 +84,7 @@ $(BUILD)/$(o)/xgk.$(o)
 		$(BUILD)/$(o)/imgui_impl_opengl3.$(o) \
 		$(BUILD)/$(o)/imgui_impl_vulkan.$(o) \
 		$(XGK_MATH_BUILD)/$(a)/xgk-math.$(a) \
+		$(XGK_AUX_BUILD)/$(a)/xgk-aux.$(a) \
 		$(BUILD)/$(o)/gl.$(o) \
 		$(BUILD)/$(o)/vk.$(o) \
 		$(BUILD)/$(o)/xgk.$(o) \
@@ -171,6 +175,15 @@ $(XGK_MATH_SRC)/util/util.h \
 $(XGK_MATH_SRC)/util/util.cpp \
 $(XGK_MATH_SRC)/util/util-asm-x64.$(s)
 	$(_MAKE) -f $(ROOT)/reps/denis-belov/xgk-math/makefiles/$(BUILD_TYPE)/makefile
+
+
+
+$(XGK_AUX_BUILD)/$(a)/xgk-aux.$(a) :\
+$(XGK_AUX_SRC)/transition/transition.h \
+$(XGK_AUX_SRC)/transition/transition.cpp \
+$(XGK_AUX_SRC)/transition-stack/transition-stack.h \
+$(XGK_AUX_SRC)/transition-stack/transition-stack.cpp
+	$(_MAKE) -f $(ROOT)/reps/denis-belov/xgk-aux/makefiles/$(BUILD_TYPE)/makefile
 
 
 
