@@ -13,7 +13,13 @@ layout (set = 0, binding = 0) uniform camera {
 
 	mat4 proj_mat;
 	mat4 view_mat;
-};
+} cam[2];
+
+layout (set = 0, binding = 1) uniform camera2 {
+
+	mat4 proj_mat;
+	mat4 view_mat;
+} cam2[2];
 
 layout (location = 0) out vec3 color;
 
@@ -21,6 +27,6 @@ void main (void) {
 
 	color = vertex_data;
 
-	gl_Position = proj_mat * view_mat * vec4(vertex_data * 2.0, 1.0);
+	gl_Position = cam[1].proj_mat * cam2[0].view_mat * vec4(vertex_data * 2.0, 1.0);
 	// gl_Position = vec4(vertex_data.xy * 0.5, 0.0, 1.0);
 }

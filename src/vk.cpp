@@ -7,13 +7,11 @@
 #include <vector>
 
 #if defined(__linux__)
-
 	#define GLFW_EXPOSE_NATIVE_X11
 	#define VK_USE_PLATFORM_XLIB_KHR
 	#include <X11/Xlib.h>
 	#include <dlfcn.h>
 #elif defined(_WIN64)
-
 	#define GLFW_EXPOSE_NATIVE_WIN32
 	#define VK_USE_PLATFORM_WIN32_KHR
 	#define WIN32_LEAN_AND_MEAN
@@ -35,13 +33,11 @@
 //
 
 #if defined(__GNUC__)
-
-	#include "xgk-test/build/gnu-x64/h/vertex_shader_code_vulkan.h"
-	#include "xgk-test/build/gnu-x64/h/fragment_shader_code_vulkan.h"
+	#include "vertex_shader_code_vulkan.h"
+	#include "fragment_shader_code_vulkan.h"
 #else
-
-	#include "xgk-test/build/msvs-x64/h/vertex_shader_code_vulkan.h"
-	#include "xgk-test/build/msvs-x64/h/fragment_shader_code_vulkan.h"
+	#include "vertex_shader_code_vulkan.h"
+	#include "fragment_shader_code_vulkan.h"
 #endif
 
 
@@ -57,8 +53,8 @@ extern void (* loop_function) (void);
 extern void (* destroy_api_function) (void);
 extern GLFWwindow* window;
 // extern struct ORBIT::Orbit orbit;
-namespace ORBIT {
-
+namespace ORBIT
+{
 	struct Orbit;
 };
 
@@ -92,9 +88,11 @@ std::vector<VkPresentInfoKHR> vk_present_i;
 std::vector<VkRenderPassBeginInfo> vk_render_pass_bi;
 std::vector<VkCommandBuffer> vk_cmd_buffers;
 VkClearValue clear_value[] = { {}, {} };
-VkPipelineLayout vk_ppl_layout = VK_NULL_HANDLE;
 std::vector<VkDescriptorSet> vk_descr_set;
+VkPipelineLayout vk_ppl_layout = VK_NULL_HANDLE;
 VkPipeline vk_ppl = VK_NULL_HANDLE;
+// VkPipelineLayout vk_ppl_layout2 = VK_NULL_HANDLE;
+VkPipeline vk_ppl2 = VK_NULL_HANDLE;
 VkBuffer vk_vertex_buffer = VK_NULL_HANDLE;
 
 
@@ -106,8 +104,8 @@ ImGui_ImplVulkanH_Window g_MainWindowData;
 
 
 
-namespace TIME {
-
+namespace TIME
+{
 	struct Time;
 
 	void getTime (Time* time);
@@ -117,8 +115,8 @@ extern TIME::Time _time;
 
 
 
-void loop_function_VK (void) {
-
+void loop_function_VK (void)
+{
 	memcpy(vk_uniform_buffer_mem_addr + 64, ((void*) &orbit) + 64, 64);
 
 	// causes validation error without crashing, has to be global static
@@ -139,8 +137,8 @@ void loop_function_VK (void) {
 	// GUI
 	extern uint8_t gui_g;
 
-	if (gui_g) {
-
+	if (gui_g)
+	{
 	  vkCmdBeginRenderPass(vk_cmd_buffers[curr_image], &vk_render_pass_bi[curr_image], VK_SUBPASS_CONTENTS_INLINE);
 
 	  ImGui_ImplVulkan_NewFrame();
@@ -148,39 +146,42 @@ void loop_function_VK (void) {
 	  ImGui::NewFrame();
 
 	  {
-	      static float f = 0.0f;
-	      static int counter = 0;
+			static float f = 0.0f;
+			static int counter = 0;
 
-	      ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+			ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
 
-	      ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-	      // ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-	      // ImGui::Checkbox("Another Window", &show_another_window);
+			ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
+			// ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
+			// ImGui::Checkbox("Another Window", &show_another_window);
 
-	      ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-	      // ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+			ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+			// ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
 
-	      if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-	          counter++;
-	      ImGui::SameLine();
-	      ImGui::Text("counter = %d", counter);
+			if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+					counter++;
+			ImGui::SameLine();
+			ImGui::Text("counter = %d", counter);
 
-	      // ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-	      ImGui::End();
+			// ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+			ImGui::End();
 	  }
 
 	  ImGui::Render();
 	  ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), vk_cmd_buffers[curr_image]);
 	}
-	//
-
-	else {
-
+	else
+	{
 		vkCmdBindDescriptorSets(vk_cmd_buffers[curr_image], VK_PIPELINE_BIND_POINT_GRAPHICS, vk_ppl_layout, 0, 1, &vk_descr_set[0], 0, nullptr);
+
 		vkCmdBindVertexBuffers(vk_cmd_buffers[curr_image], 0, 1, &vk_vertex_buffer, &vk_vertex_buffer_offset);
 		vkCmdBeginRenderPass(vk_cmd_buffers[curr_image], &vk_render_pass_bi[curr_image], VK_SUBPASS_CONTENTS_INLINE);
+		// vkCmdBindDescriptorSets(vk_cmd_buffers[curr_image], VK_PIPELINE_BIND_POINT_GRAPHICS, vk_ppl_layout, 0, 1, &vk_descr_set[0], 0, nullptr);
 		vkCmdBindPipeline(vk_cmd_buffers[curr_image], VK_PIPELINE_BIND_POINT_GRAPHICS, vk_ppl);
 		vkCmdDraw(vk_cmd_buffers[curr_image], vertices_size / 12, 1, 0, 0);
+
+		vkCmdBindPipeline(vk_cmd_buffers[curr_image], VK_PIPELINE_BIND_POINT_GRAPHICS, vk_ppl2);
+		vkCmdDraw(vk_cmd_buffers[curr_image], 1, 1, 0, 0);
 	}
 
 
@@ -198,14 +199,14 @@ void loop_function_VK (void) {
 
 	const static uint64_t max_swapchain_image_index = vk_swapchain_image_count - 1;
 
-	if (++curr_image > max_swapchain_image_index) {
-
+	if (++curr_image > max_swapchain_image_index)
+	{
 		curr_image = 0;
 	}
 };
 
-void destroyVK (void) {
-
+void destroyVK (void)
+{
 	loop_function = idle_function;
 
 	vkDeviceWaitIdle(vk_dev.handle);
@@ -229,10 +230,10 @@ void destroyVK (void) {
 	glfwTerminate();
 };
 
-void initVK (void) {
-
-	if (destroy_api_function != destroyVK) {
-
+void initVK (void)
+{
+	if (destroy_api_function != destroyVK)
+	{
 		// destroy current context
 
 		destroy_api_function();
@@ -256,21 +257,15 @@ void initVK (void) {
 		// base vulkan
 
 		#ifdef DEBUG
-
 			#if defined(__linux__)
-
 				const char* vk_inst_exts[] = { "VK_KHR_surface", "VK_KHR_xlib_surface", VK_EXT_DEBUG_REPORT_EXTENSION_NAME };
 			#elif defined(_WIN64)
-
 				const char* vk_inst_exts[] = { "VK_KHR_surface", "VK_KHR_win32_surface", VK_EXT_DEBUG_REPORT_EXTENSION_NAME };
 			#endif
 		#else
-
 			#if defined(__linux__)
-
 				const char* vk_inst_exts[] = { "VK_KHR_surface", "VK_KHR_xlib_surface" };
 			#elif defined(_WIN64)
-
 				const char* vk_inst_exts[] = { "VK_KHR_surface", "VK_KHR_win32_surface" };
 			#endif
 		#endif
@@ -278,12 +273,10 @@ void initVK (void) {
 		VkApplicationInfo app_i = AppI();
 
 		#ifdef DEBUG
-
 			const char* vk_inst_layers[] = { "VK_LAYER_KHRONOS_validation" };
 
 			vk_inst.create(&app_i, 1, vk_inst_layers, 3, vk_inst_exts);
 		#else
-
 			vk_inst.create(&app_i, 0, nullptr, 2, vk_inst_exts);
 		#endif
 
@@ -301,10 +294,8 @@ void initVK (void) {
 		// cout << pProperties.deviceName << endl;
 
 		#if defined(__linux__)
-
 			vk_surf = vk_inst.SurfaceKHR(glfwGetX11Display(), glfwGetX11Window(window));
 		#elif defined(_WIN64)
-
 			vk_surf = vk_inst.SurfaceKHR(GetModuleHandle(nullptr), glfwGetWin32Window(window));
 		#endif
 
@@ -316,8 +307,8 @@ void initVK (void) {
 
 		std::vector<VkDeviceQueueCreateInfo> queue_ci = { DevQueueCI(vk_dev.graphics_queue_family_index, 1, &queue_priorities) };
 
-		if (vk_dev.graphics_queue_family_index != vk_dev.present_queue_family_index) {
-
+		if (vk_dev.graphics_queue_family_index != vk_dev.present_queue_family_index)
+		{
 			queue_ci.push_back(DevQueueCI(vk_dev.present_queue_family_index, 1, &queue_priorities));
 		}
 
@@ -334,8 +325,8 @@ void initVK (void) {
 		// render pass
 
 		// objects accessed by render pass
-		VkAttachmentDescription vk_render_pass_attach[] = {
-
+		VkAttachmentDescription vk_render_pass_attach[] =
+		{
 			// color
 			{
 				0,
@@ -374,28 +365,29 @@ void initVK (void) {
 		VkAttachmentReference depth_attach_ref = { 1, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL };
 		// VkAttachmentReference color_attach_resolve_ref = { 2, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL };
 
-		VkSubpassDescription subpass_desc = {
-
+		VkSubpassDescription subpass_desc =
+		{
 			0, VK_PIPELINE_BIND_POINT_GRAPHICS,
 			0, nullptr,
 			// 1, &color_attach_ref, &color_attach_resolve_ref, &depth_attach_ref
 			1, &color_attach_ref, nullptr, &depth_attach_ref
 		};
 
-		VkSubpassDependency subpass_dep = {
-
+		VkSubpassDependency subpass_dep =
+		{
 			VK_SUBPASS_EXTERNAL, 0,
 			VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
 			0, VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT
 		};
 
-		vk_render_pass = vk_dev.RenderPass(
-
-			// 3, vk_render_pass_attach,
-			2, vk_render_pass_attach,
-			1, &subpass_desc,
-			1, &subpass_dep
-		);
+		vk_render_pass =
+			vk_dev.RenderPass
+			(
+				// 3, vk_render_pass_attach,
+				2, vk_render_pass_attach,
+				1, &subpass_desc,
+				1, &subpass_dep
+			);
 
 
 
@@ -403,8 +395,8 @@ void initVK (void) {
 
 		const uint32_t qfi[] = { vk_dev.graphics_queue_family_index, vk_dev.present_queue_family_index };
 
-		vk_swapchain = vk_dev.SwapchainKHR(
-
+		vk_swapchain = vk_dev.SwapchainKHR
+		(
 			vk_surf,
 			8,
 			VK_FORMAT_B8G8R8A8_UNORM,
@@ -445,10 +437,10 @@ void initVK (void) {
 		uint64_t vk_depth_image_dev_local_mem_index = 0;
 		std::vector<VkDeviceMemory> vk_depth_image_mems(vk_swapchain_image_count);
 
-		for (uint64_t i = 0; i < vk_swapchain_image_count; i++) {
-
-			vk_swapchain_image_views[i] = vk_dev.ImageView(
-
+		for (uint64_t i = 0; i < vk_swapchain_image_count; ++i)
+		{
+			vk_swapchain_image_views[i] = vk_dev.ImageView
+			(
 				vk_swapchain_images[i],
 				VK_IMAGE_VIEW_TYPE_2D,
 				VK_FORMAT_B8G8R8A8_UNORM,
@@ -458,8 +450,8 @@ void initVK (void) {
 				0, 1
 			);
 
-			vk_render_images[i] = vk_dev.Image(
-
+			vk_render_images[i] = vk_dev.Image
+			(
 				VK_IMAGE_TYPE_2D,
 				VK_FORMAT_B8G8R8A8_UNORM,
 				800, 600, 1,
@@ -473,8 +465,8 @@ void initVK (void) {
 				VK_IMAGE_LAYOUT_UNDEFINED
 			);
 
-			if (!i) {
-
+			if (!i)
+			{
 				vk_render_image_mem_reqs = vk_dev.MemReqs(vk_render_images[i]);
 
 				vk_render_image_dev_local_mem_index = vk_dev.getMemTypeIndex(&vk_render_image_mem_reqs, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
@@ -484,8 +476,8 @@ void initVK (void) {
 
 			vk_dev.bindMem(vk_render_images[i], vk_render_image_mems[i]);
 
-			vk_render_image_views[i] = vk_dev.ImageView(
-
+			vk_render_image_views[i] = vk_dev.ImageView
+			(
 				vk_render_images[i],
 				VK_IMAGE_VIEW_TYPE_2D,
 				VK_FORMAT_B8G8R8A8_UNORM,
@@ -497,8 +489,8 @@ void initVK (void) {
 
 
 
-			vk_depth_images[i] = vk_dev.Image(
-
+			vk_depth_images[i] = vk_dev.Image
+			(
 				VK_IMAGE_TYPE_2D,
 				VK_FORMAT_D32_SFLOAT,
 				800, 600, 1,
@@ -512,8 +504,8 @@ void initVK (void) {
 				VK_IMAGE_LAYOUT_UNDEFINED
 			);
 
-			if (!i) {
-
+			if (!i)
+			{
 				vk_depth_image_mem_reqs = vk_dev.MemReqs(vk_depth_images[i]);
 
 				vk_depth_image_dev_local_mem_index = vk_dev.getMemTypeIndex(&vk_depth_image_mem_reqs, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
@@ -523,8 +515,8 @@ void initVK (void) {
 
 			vk_dev.bindMem(vk_depth_images[i], vk_depth_image_mems[i]);
 
-			vk_depth_image_views[i] = vk_dev.ImageView(
-
+			vk_depth_image_views[i] = vk_dev.ImageView
+			(
 				vk_depth_images[i],
 				VK_IMAGE_VIEW_TYPE_2D,
 				VK_FORMAT_D32_SFLOAT,
@@ -540,8 +532,8 @@ void initVK (void) {
 			// VkImageView vk_framebuffer_attach[] = { vk_render_image_views[i], vk_depth_image_views[i], vk_swapchain_image_views[i] };
 			VkImageView vk_framebuffer_attach[] = { vk_swapchain_image_views[i], vk_depth_image_views[i] };
 
-			vk_framebuffers[i] = vk_dev.Framebuffer(
-
+			vk_framebuffers[i] = vk_dev.Framebuffer
+			(
 				vk_render_pass,
 				// 3, vk_framebuffer_attach,
 				2, vk_framebuffer_attach,
@@ -551,8 +543,8 @@ void initVK (void) {
 
 			vk_submission_completed_fences[i] = vk_dev.Fence(VK_FENCE_CREATE_SIGNALED_BIT);
 
-			VkSemaphoreTypeCreateInfo vk_semaphore_type_ci = {
-
+			VkSemaphoreTypeCreateInfo vk_semaphore_type_ci =
+			{
 				VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO,
 				nullptr,
 				VK_SEMAPHORE_TYPE_BINARY,
@@ -602,32 +594,95 @@ void initVK (void) {
 
 		// descriptors
 
-		VkDescriptorSetLayoutBinding vk_descr_set_layout_binding = { 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT, nullptr };
+		// VkDescriptorSetLayoutBinding vk_descr_set_layout_binding = { 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT, nullptr };
+		VkDescriptorSetLayoutBinding vk_descr_set_layout_binding[] =
+		{
+			{ 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 2, VK_SHADER_STAGE_VERTEX_BIT, nullptr },
+			{ 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 2, VK_SHADER_STAGE_VERTEX_BIT, nullptr },
+			{ 2, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 2, VK_SHADER_STAGE_VERTEX_BIT, nullptr },
+			{ 3, VK_DESCRIPTOR_TYPE_SAMPLER, 2, VK_SHADER_STAGE_VERTEX_BIT, nullptr },
+		};
 
-		VkDescriptorSetLayout vk_descr_set_layout = vk_dev.DescrSetLayout(1, &vk_descr_set_layout_binding);
+		VkDescriptorSetLayout vk_descr_set_layout = vk_dev.DescrSetLayout(2, vk_descr_set_layout_binding);
 
 
 
-		VkDescriptorPoolSize vk_descr_pool_size = { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1 };
+		// VkDescriptorPoolSize vk_descr_pool_size = { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 0 };
 
-		VkDescriptorPool vk_descr_pool = vk_dev.DescrPool(1, 1, &vk_descr_pool_size);
+		// VkDescriptorPool vk_descr_pool = vk_dev.DescrPool(2, 1, &vk_descr_pool_size);
 
-		vk_descr_set = vk_dev.DescrSet(vk_descr_pool, 1, &vk_descr_set_layout);
+		VkDescriptorPool vk_descr_pool = vk_dev.DescrPool
+		(
+			2,
+			0, nullptr
+		);
+
+		VkDescriptorSetLayout lay[] = { vk_descr_set_layout, vk_descr_set_layout };
+
+		vk_descr_set = vk_dev.DescrSet(vk_descr_pool, 2, lay);
 
 
 
 		VkDescriptorBufferInfo vk_descr_bi = { vk_uniform_buffer, 0, VK_WHOLE_SIZE };
 
-		VkWriteDescriptorSet write_descr_set = WriteDescrSet(
+		// VkWriteDescriptorSet write_descr_set = WriteDescrSet(
 
-			vk_descr_set[0], 0, 0,
-			1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-			nullptr,
-			&vk_descr_bi,
-			nullptr
-		);
+		// 	vk_descr_set[0], 1, 0,
+		// 	1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+		// 	nullptr,
+		// 	&vk_descr_bi,
+		// 	nullptr
+		// );
 
-		vk_dev.updateDescrSets(1, &write_descr_set, 0, nullptr);
+		VkWriteDescriptorSet write_descr_set[] =
+		{
+			WriteDescrSet
+			(
+				vk_descr_set[0], 0, 0,
+				1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+				nullptr,
+				&vk_descr_bi,
+				nullptr
+			),
+
+			WriteDescrSet
+			(
+				vk_descr_set[0], 0, 1,
+				1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+				nullptr,
+				&vk_descr_bi,
+				nullptr
+			),
+
+			WriteDescrSet
+			(
+				vk_descr_set[0], 1, 0,
+				1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+				nullptr,
+				&vk_descr_bi,
+				nullptr
+			),
+
+			WriteDescrSet
+			(
+				vk_descr_set[0], 1, 1,
+				1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+				nullptr,
+				&vk_descr_bi,
+				nullptr
+			)
+
+			// WriteDescrSet
+			// (
+			// 	vk_descr_set[0], 1, 0,
+			// 	1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+			// 	nullptr,
+			// 	&vk_descr_bi,
+			// 	nullptr
+			// )
+		};
+
+		vk_dev.updateDescrSets(4, write_descr_set, 0, nullptr);
 
 
 
@@ -669,28 +724,29 @@ void initVK (void) {
 
 		// VkPipelineDepthStencilStateCreateInfo vk_default_ppl_depth_stenc = PplDepthStenc(VK_FALSE, VK_FALSE, VK_COMPARE_OP_LESS, VK_FALSE, VK_FALSE, { 0 }, { 0 }, 0.0f, 1.0f);
 
-		VkPipelineColorBlendAttachmentState vk_blend_attach = {
-
+		VkPipelineColorBlendAttachmentState vk_blend_attach =
+		{
 			VK_FALSE,
 			VK_BLEND_FACTOR_ZERO, VK_BLEND_FACTOR_ZERO, VK_BLEND_OP_ADD,
 			VK_BLEND_FACTOR_ZERO, VK_BLEND_FACTOR_ZERO, VK_BLEND_OP_ADD,
 			VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT
 		};
 
-		VkPipelineColorBlendStateCreateInfo vk_default_ppl_blend = PplBlend(
-
-			VK_FALSE,
-			VK_LOGIC_OP_CLEAR,
-			1, &vk_blend_attach,
-			0.0f, 0.0f, 0.0f, 0.0f
-		);
+		VkPipelineColorBlendStateCreateInfo vk_default_ppl_blend =
+			PplBlend
+			(
+				VK_FALSE,
+				VK_LOGIC_OP_CLEAR,
+				1, &vk_blend_attach,
+				0.0f, 0.0f, 0.0f, 0.0f
+			);
 
 		VkPipelineDynamicStateCreateInfo vk_default_ppl_dyn = PplDyn(0, nullptr);
 
 
 
-		VkPipelineShaderStageCreateInfo vk_ppl_stages[] = {
-
+		VkPipelineShaderStageCreateInfo vk_ppl_stages[] =
+		{
 			PplShader(VK_SHADER_STAGE_VERTEX_BIT, vk_dev.Shader(sizeof(vertex_shader_code_vulkan), vertex_shader_code_vulkan)),
 			PplShader(VK_SHADER_STAGE_FRAGMENT_BIT, vk_dev.Shader(sizeof(fragment_shader_code_vulkan), fragment_shader_code_vulkan))
 		};
@@ -702,8 +758,28 @@ void initVK (void) {
 
 		vk_ppl_layout = vk_dev.PplLayout(1, &vk_descr_set_layout);
 
-		vk_ppl = vk_dev.PplG(
+		vk_ppl =
+			vk_dev.PplG
+			(
+				2, vk_ppl_stages,
+				&vk_ppl_vertex,
+				&vk_default_ppl_input_asm,
+				&vk_default_ppl_tess,
+				&vk_default_ppl_view,
+				&vk_default_ppl_rast,
+				&vk_default_ppl_sample,
+				&vk_default_ppl_depth_stenc,
+				&vk_default_ppl_blend,
+				&vk_default_ppl_dyn,
+				vk_ppl_layout,
+				vk_render_pass, 0
+			);
 
+		// vk_ppl_layout2 = vk_dev.PplLayout(1, &vk_descr_set_layout);
+
+		vk_ppl2 =
+		vk_dev.PplG
+		(
 			2, vk_ppl_stages,
 			&vk_ppl_vertex,
 			&vk_default_ppl_input_asm,
@@ -735,27 +811,27 @@ void initVK (void) {
 
 		// Create Descriptor Pool
 		{
-		    VkDescriptorPoolSize pool_sizes[] =
-		    {
-		        { VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
-		        { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
-		        { VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },
-		        { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000 },
-		        { VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000 },
-		        { VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000 },
-		        { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
-		        { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
-		        { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000 },
-		        { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
-		        { VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 }
-		    };
-		    VkDescriptorPoolCreateInfo pool_info = {};
-		    pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-		    pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
-		    pool_info.maxSets = 1000 * IM_ARRAYSIZE(pool_sizes);
-		    pool_info.poolSizeCount = (uint32_t)IM_ARRAYSIZE(pool_sizes);
-		    pool_info.pPoolSizes = pool_sizes;
-		    vkCreateDescriptorPool(vk_dev.handle, &pool_info, nullptr, &g_DescriptorPool);
+			VkDescriptorPoolSize pool_sizes[] =
+			{
+				{ VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
+				{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
+				{ VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },
+				{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000 },
+				{ VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000 },
+				{ VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000 },
+				{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
+				{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
+				{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000 },
+				{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
+				{ VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 }
+			};
+			VkDescriptorPoolCreateInfo pool_info = {};
+			pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+			pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+			pool_info.maxSets = 1000 * IM_ARRAYSIZE(pool_sizes);
+			pool_info.poolSizeCount = (uint32_t)IM_ARRAYSIZE(pool_sizes);
+			pool_info.pPoolSizes = pool_sizes;
+			vkCreateDescriptorPool(vk_dev.handle, &pool_info, nullptr, &g_DescriptorPool);
 		}
 
 		// Setup Platform/Renderer bindings
@@ -808,21 +884,23 @@ void initVK (void) {
 
 		static const VkPipelineStageFlags vk_wait_stages = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 
-		for (uint64_t i = 0; i < vk_swapchain_image_count; i++) {
+		for (uint64_t i = 0; i < vk_swapchain_image_count; ++i)
+		{
+			vk_submit_i[i] =
+				SubmitI
+				(
+					1, &vk_image_available_semaphores[i], &vk_wait_stages,
+					1, &vk_cmd_buffers[i],
+					1, &vk_submission_completed_semaphores[i]
+				);
 
-			vk_submit_i[i] = SubmitI(
-
-				1, &vk_image_available_semaphores[i], &vk_wait_stages,
-				1, &vk_cmd_buffers[i],
-				1, &vk_submission_completed_semaphores[i]
-			);
-
-			vk_present_i[i] = PresentI(
-
-				1, &vk_submission_completed_semaphores[i],
-				1, &vk_swapchain,
-				nullptr
-			);
+			vk_present_i[i] =
+				PresentI
+				(
+					1, &vk_submission_completed_semaphores[i],
+					1, &vk_swapchain,
+					nullptr
+				);
 
 			vk_render_pass_bi[i] = RenderPassBeginI(vk_render_pass, vk_framebuffers[i], { 0, 0, 800, 600 }, 2, clear_value);
 		}
