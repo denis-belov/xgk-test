@@ -17,7 +17,6 @@
 
 #include "GLFW/glfw3.h"
 
-// #include "xgk-math/src/data/data.h"
 #include "xgk-math/src/data/mat4/mat4.h"
 #include "xgk-math/src/object/object.h"
 #include "xgk-math/src/util/util.h"
@@ -32,8 +31,8 @@ namespace XGK
 	namespace DATA
 	{
 		extern const uint8_t FLOAT_SIZE_4;
-	};
-};
+	}
+}
 
 
 
@@ -46,7 +45,7 @@ namespace TIME
 {
 	void getFramerate (void)
 	{
-		using std::chrono;
+		using namespace std::chrono;
 
 		static const time_point<system_clock> start_time = system_clock::now();
 		static time_point<system_clock> program_time = system_clock::now();
@@ -72,11 +71,11 @@ namespace TIME
 
 			frames = 0;
 		}
-	};
+	}
 
 	void getAverageFrametime (void)
 	{
-		using std::chrono;
+		using namespace std::chrono;
 
 		static time_point<system_clock> start_time = system_clock::now();
 		static time_point<system_clock> program_time = system_clock::now();
@@ -102,45 +101,45 @@ namespace TIME
 			now_seconds = 0;
 			frames = 0;
 		}
-	};
+	}
 
 	void getTime (void)
 	{
-		using std::chrono;
+		using namespace std::chrono;
 
 		static time_point<system_clock> program_time;
 		static time_point<system_clock> last_program_time;
 
 		program_time = system_clock::now();
 
-		const uint64_t nanoseconds = duration_cast<nanoseconds>(program_time - last_program_time).count();
+		const uint64_t nanosecond_count = duration_cast<nanoseconds>(program_time - last_program_time).count();
 
 		last_program_time = program_time;
-	};
+	}
 
 	void getTime2 (void)
 	{
-		using std::chrono;
+		using namespace std::chrono;
 
 		static time_point<system_clock> program_time;
 		static time_point<system_clock> last_program_time;
 
 		program_time = system_clock::now();
 
-		const uint64_t nanoseconds = duration_cast<nanoseconds>(program_time - last_program_time).count();
+		const uint64_t nanosecond_count = duration_cast<nanoseconds>(program_time - last_program_time).count();
 
 		last_program_time = program_time;
 
 		#if defined(__linux__)
-			printf("Time: %lu\n", nanoseconds);
+			printf("Time: %lu\n", nanosecond_count);
 		#elif defined(_WIN64)
-			printf("Time: %llu\n", nanoseconds);
+			printf("Time: %llu\n", nanosecond_count);
 		#endif
-	};
+	}
 
 	void calculateFrametime (uint64_t* frame_time)
 	{
-		using std::chrono;
+		using namespace std::chrono;
 
 		static time_point<system_clock> program_time;
 		static time_point<system_clock> last_program_time;
@@ -150,26 +149,26 @@ namespace TIME
 		*frame_time = duration_cast<nanoseconds>(program_time - last_program_time).count();
 
 		last_program_time = program_time;
-	};
-};
+	}
+}
 
 
 
 namespace ORBIT
 {
-	alignas(16) struct Orbit
+	struct alignas(16) Orbit
 	{
 		XGK::DATA::Mat4 proj_mat;
 		XGK::DATA::Mat4 view_mat;
 
-		alignas(8) XGK::Object object;
+		XGK::Object object;
 
-		alignas(4) float rotation_speed_x;
-		alignas(4) float rotation_speed_y;
+		float rotation_speed_x;
+		float rotation_speed_y;
 
-		alignas(4) float translation_speed_x;
-		alignas(4) float translation_speed_y;
-		alignas(4) float translation_speed_z;
+		float translation_speed_x;
+		float translation_speed_y;
+		float translation_speed_z;
 
 
 
@@ -212,7 +211,7 @@ namespace ORBIT
 
 		view_mat = object.mat;
 
-		view_mat.invns();
+		// view_mat.invns();
 	}
 };
 
@@ -236,44 +235,51 @@ volatile uint8_t render_flag = 1;
 
 
 
+// const float vertices[] =
+// {
+// 	-1.0f,-1.0f,-1.0f,
+// 	-1.0f,-1.0f, 1.0f,
+// 	-1.0f, 1.0f, 1.0f,
+// 	1.0f, 1.0f,-1.0f,
+// 	-1.0f,-1.0f,-1.0f,
+// 	-1.0f, 1.0f,-1.0f,
+// 	1.0f,-1.0f, 1.0f,
+// 	-1.0f,-1.0f,-1.0f,
+// 	1.0f,-1.0f,-1.0f,
+// 	1.0f, 1.0f,-1.0f,
+// 	1.0f,-1.0f,-1.0f,
+// 	-1.0f,-1.0f,-1.0f,
+// 	-1.0f,-1.0f,-1.0f,
+// 	-1.0f, 1.0f, 1.0f,
+// 	-1.0f, 1.0f,-1.0f,
+// 	1.0f,-1.0f, 1.0f,
+// 	-1.0f,-1.0f, 1.0f,
+// 	-1.0f,-1.0f,-1.0f,
+// 	-1.0f, 1.0f, 1.0f,
+// 	-1.0f,-1.0f, 1.0f,
+// 	1.0f,-1.0f, 1.0f,
+// 	1.0f, 1.0f, 1.0f,
+// 	1.0f,-1.0f,-1.0f,
+// 	1.0f, 1.0f,-1.0f,
+// 	1.0f,-1.0f,-1.0f,
+// 	1.0f, 1.0f, 1.0f,
+// 	1.0f,-1.0f, 1.0f,
+// 	1.0f, 1.0f, 1.0f,
+// 	1.0f, 1.0f,-1.0f,
+// 	-1.0f, 1.0f,-1.0f,
+// 	1.0f, 1.0f, 1.0f,
+// 	-1.0f, 1.0f,-1.0f,
+// 	-1.0f, 1.0f, 1.0f,
+// 	1.0f, 1.0f, 1.0f,
+// 	-1.0f, 1.0f, 1.0f,
+// 	1.0f,-1.0f, 1.0f
+// };
+
 const float vertices[] =
 {
-	-1.0f,-1.0f,-1.0f,
-	-1.0f,-1.0f, 1.0f,
-	-1.0f, 1.0f, 1.0f,
-	1.0f, 1.0f,-1.0f,
-	-1.0f,-1.0f,-1.0f,
-	-1.0f, 1.0f,-1.0f,
-	1.0f,-1.0f, 1.0f,
-	-1.0f,-1.0f,-1.0f,
-	1.0f,-1.0f,-1.0f,
-	1.0f, 1.0f,-1.0f,
-	1.0f,-1.0f,-1.0f,
-	-1.0f,-1.0f,-1.0f,
-	-1.0f,-1.0f,-1.0f,
-	-1.0f, 1.0f, 1.0f,
-	-1.0f, 1.0f,-1.0f,
-	1.0f,-1.0f, 1.0f,
-	-1.0f,-1.0f, 1.0f,
-	-1.0f,-1.0f,-1.0f,
-	-1.0f, 1.0f, 1.0f,
-	-1.0f,-1.0f, 1.0f,
-	1.0f,-1.0f, 1.0f,
-	1.0f, 1.0f, 1.0f,
-	1.0f,-1.0f,-1.0f,
-	1.0f, 1.0f,-1.0f,
-	1.0f,-1.0f,-1.0f,
-	1.0f, 1.0f, 1.0f,
-	1.0f,-1.0f, 1.0f,
-	1.0f, 1.0f, 1.0f,
-	1.0f, 1.0f,-1.0f,
-	-1.0f, 1.0f,-1.0f,
-	1.0f, 1.0f, 1.0f,
-	-1.0f, 1.0f,-1.0f,
-	-1.0f, 1.0f, 1.0f,
-	1.0f, 1.0f, 1.0f,
-	-1.0f, 1.0f, 1.0f,
-	1.0f,-1.0f, 1.0f
+	-1.0f, -1.0f, 0.0f,
+	0.0f, 1.0f, 0.0f,
+	1.0f, -1.0f, 0.0f
 };
 
 const float* _vertices = vertices;
@@ -551,27 +557,27 @@ int main (void)
 
 
 
-	float a = 0.0f;
-	float b = 0.0f;
+	// float a = 0.0f;
+	// float b = 0.0f;
 
-	std::chrono::time_point<std::chrono::system_clock> t1 = std::chrono::system_clock::now();
+	// std::chrono::time_point<std::chrono::system_clock> t1 = std::chrono::system_clock::now();
 
-	for (size_t i = 0; i < 9999999; ++i)
-	{
-		b += BezierCubicCurve(((float) i) / 9999999.0f, .2,.97,.82,-0.97);
-	}
+	// for (size_t i = 0; i < 9999999; ++i)
+	// {
+	// 	b += BezierCubicCurve(((float) i) / 9999999.0f, .2,.97,.82,-0.97);
+	// }
 
-	std::chrono::time_point<std::chrono::system_clock> t2 = std::chrono::system_clock::now();
+	// std::chrono::time_point<std::chrono::system_clock> t2 = std::chrono::system_clock::now();
 
-	for (size_t i = 0; i < 9999999; ++i)
-	{
-		a += curve_values[uint64_t(((float) i) / 9999999.0f * 1000000.0f)];
-	}
+	// for (size_t i = 0; i < 9999999; ++i)
+	// {
+	// 	a += curve_values[uint64_t(((float) i) / 9999999.0f * 1000000.0f)];
+	// }
 
-	std::chrono::time_point<std::chrono::system_clock> t3 = std::chrono::system_clock::now();
+	// std::chrono::time_point<std::chrono::system_clock> t3 = std::chrono::system_clock::now();
 
-	cout << "a: " << a << " " << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count() << endl;
-	cout << "b: " << b << " " << std::chrono::duration_cast<std::chrono::nanoseconds>(t3 - t2).count() << endl;
+	// cout << "a: " << a << " " << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count() << endl;
+	// cout << "b: " << b << " " << std::chrono::duration_cast<std::chrono::nanoseconds>(t3 - t2).count() << endl;
 
 
 

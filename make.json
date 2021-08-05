@@ -24,13 +24,15 @@
 		"$(LIBS)/glfw-3.3.2/include",
 		"$(REPS)/denis-belov",
 		"$(REPS)/denis-belov/xgk-test/build/gcc-x64/h",
-		"$(REPS)/denis-belov/xgk-math/src"
+		"$(REPS)/denis-belov/xgk-math/src",
+		"$(REPS)/denis-belov/xgk-aux/src"
 	],
 
 	"system_libraries":
 	[
 		"dl",
 		"pthread",
+		"X11",
 		"Xrandr",
 		"Xxf86vm",
 		"Xi",
@@ -98,7 +100,14 @@
 		{
 			"cpp":
 			[
-				"$(LIBS)/glad/src/glad.c",
+				{
+					"source": "$(LIBS)/glad/src/glad.c",
+					"options":
+					{
+						"flags": "-w"
+					}
+				},
+
 				"$(REPS)/ocornut/imgui/imgui.cpp",
 				"$(REPS)/ocornut/imgui/imgui_widgets.cpp",
 				"$(REPS)/ocornut/imgui/imgui_draw.cpp",
