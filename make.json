@@ -66,32 +66,29 @@
 				{
 					"source": "$(SRC)/vk.cpp",
 
-					"options":
-					{
-						"headers":
+					"headers":
+					[
+						"$(REPS)/denis-belov/xgk-aux/src/api/vulkan.h",
+						"$(BUILD)/h/vertex_shader_code_vulkan.h",
+						"$(BUILD)/h/fragment_shader_code_vulkan.h"
+					],
+
+					"custom_dependencies":
+					[
 						[
-							"$(REPS)/denis-belov/xgk-aux/src/api/vulkan.h",
-							"$(BUILD)/h/vertex_shader_code_vulkan.h",
-							"$(BUILD)/h/fragment_shader_code_vulkan.h"
+							"$(BUILD)/h/vertex_shader_code_vulkan.h : $(SRC)/vk-shaders/vertex_shader_code_vulkan.vert\n",
+							"\t$(MAKE_SPV) && $(MAKE_H) && ",
+							"glslangValidator -o $(BUILD)/spv/vertex_shader_code_vulkan.spv $(SRC)/vk-shaders/vertex_shader_code_vulkan.vert -V -t && ",
+							"node $(REPS)/denis-belov/c-build/src/spv2h $(BUILD)/spv/vertex_shader_code_vulkan.spv $(BUILD)/h/vertex_shader_code_vulkan.h vertex_shader_code_vulkan"
 						],
 
-						"custom_dependencies":
 						[
-							[
-								"$(BUILD)/h/vertex_shader_code_vulkan.h : $(SRC)/vk-shaders/vertex_shader_code_vulkan.vert\n",
-								"\t$(MAKE_SPV) && $(MAKE_H) && ",
-								"glslangValidator -o $(BUILD)/spv/vertex_shader_code_vulkan.spv $(SRC)/vk-shaders/vertex_shader_code_vulkan.vert -V -t && ",
-								"node $(REPS)/denis-belov/c-build/src/spv2h $(BUILD)/spv/vertex_shader_code_vulkan.spv $(BUILD)/h/vertex_shader_code_vulkan.h vertex_shader_code_vulkan"
-							],
-
-							[
-								"$(BUILD)/h/fragment_shader_code_vulkan.h : $(SRC)/vk-shaders/fragment_shader_code_vulkan.frag\n",
-								"\t$(MAKE_SPV) && $(MAKE_H) && ",
-								"glslangValidator -o $(BUILD)/spv/fragment_shader_code_vulkan.spv $(SRC)/vk-shaders/fragment_shader_code_vulkan.frag -V -t && ",
-								"node $(REPS)/denis-belov/c-build/src/spv2h $(BUILD)/spv/fragment_shader_code_vulkan.spv $(BUILD)/h/fragment_shader_code_vulkan.h fragment_shader_code_vulkan"
-							]
+							"$(BUILD)/h/fragment_shader_code_vulkan.h : $(SRC)/vk-shaders/fragment_shader_code_vulkan.frag\n",
+							"\t$(MAKE_SPV) && $(MAKE_H) && ",
+							"glslangValidator -o $(BUILD)/spv/fragment_shader_code_vulkan.spv $(SRC)/vk-shaders/fragment_shader_code_vulkan.frag -V -t && ",
+							"node $(REPS)/denis-belov/c-build/src/spv2h $(BUILD)/spv/fragment_shader_code_vulkan.spv $(BUILD)/h/fragment_shader_code_vulkan.h fragment_shader_code_vulkan"
 						]
-					}
+					]
 				}
 			]
 		},
@@ -102,10 +99,7 @@
 			[
 				{
 					"source": "$(LIBS)/glad/src/glad.c",
-					"options":
-					{
-						"flags": "-w"
-					}
+					"flags": "-w"
 				},
 
 				"$(REPS)/ocornut/imgui/imgui.cpp",

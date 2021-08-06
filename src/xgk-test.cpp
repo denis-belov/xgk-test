@@ -19,10 +19,10 @@
 
 #include "xgk-math/src/data/mat4/mat4.h"
 #include "xgk-math/src/object/object.h"
-#include "xgk-math/src/util/util.h"
+// #include "xgk-math/src/util/util.h"
 
-#include "xgk-aux/src/transition-stack/transition-stack.h"
-#include "xgk-aux/src/transition/transition.h"
+// #include "xgk-aux/src/transition-stack/transition-stack.h"
+// #include "xgk-aux/src/transition/transition.h"
 
 
 
@@ -221,8 +221,8 @@ uint8_t gui_g = 0;
 
 
 
-XGK::Transition orbit_transition;
-XGK::Transition orbit_transition2;
+// XGK::Transition orbit_transition;
+// XGK::Transition orbit_transition2;
 float curve_values[1000000];
 
 ORBIT::Orbit orbit;
@@ -355,64 +355,64 @@ float BezierCubicCurve (const float time, const float x1, const float y1, const 
 	return y;
 };
 
-void test (const float interpolation)
-{
-	static float prev = 0.0f;
-	static float prev_i = 0.0f;
+// void test (const float interpolation)
+// {
+// 	static float prev = 0.0f;
+// 	static float prev_i = 0.0f;
 
-  // float temp = M_PI * curve_values[uint64_t(interpolation * 1000.0f)];
-	float temp = M_PI * BezierCubicCurve(interpolation, 0, 1, 0, 1);
+//   // float temp = M_PI * curve_values[uint64_t(interpolation * 1000.0f)];
+// 	float temp = M_PI * BezierCubicCurve(interpolation, 0, 1, 0, 1);
 
-	// Is CPU branch prediction faster than setting "end_callback"?
-	orbit.rotation_speed_x = orbit.rotation_speed_y = (interpolation < prev_i) ? temp : (temp - prev);
+// 	// Is CPU branch prediction faster than setting "end_callback"?
+// 	orbit.rotation_speed_x = orbit.rotation_speed_y = (interpolation < prev_i) ? temp : (temp - prev);
 
-	orbit.rotate();
+// 	orbit.rotate();
 
-	prev = temp;
-	prev_i = interpolation;
-};
+// 	prev = temp;
+// 	prev_i = interpolation;
+// };
 
-void test2 (const float interpolation)
-{
-	static float prev = 0.0f;
+// void test2 (const float interpolation)
+// {
+// 	static float prev = 0.0f;
 
-	// float temp = M_PI * curve_values[uint64_t(interpolation * 1000.0f)];
-	float temp = M_PI * BezierCubicCurve(interpolation, 0, 1, 0, 1);
+// 	// float temp = M_PI * curve_values[uint64_t(interpolation * 1000.0f)];
+// 	float temp = M_PI * BezierCubicCurve(interpolation, 0, 1, 0, 1);
 
-	// orbit.translation_speed_x = orbit.translation_speed_y = (temp < prev) ? temp : (temp - prev);
-	orbit.translation_speed_x = temp - prev * ceil(1.0f - interpolation);
+// 	// orbit.translation_speed_x = orbit.translation_speed_y = (temp < prev) ? temp : (temp - prev);
+// 	orbit.translation_speed_x = temp - prev * ceil(1.0f - interpolation);
 
-	orbit.transX();
+// 	orbit.transX();
 
-	prev = temp;
-};
+// 	prev = temp;
+// };
 
-void test3 (const float interpolation)
-{
-	static float prev = 0.0f;
+// void test3 (const float interpolation)
+// {
+// 	static float prev = 0.0f;
 
-	float temp = -3.14f * curve_values[uint64_t(interpolation * 1000.0f)];
+// 	float temp = -3.14f * curve_values[uint64_t(interpolation * 1000.0f)];
 
-	// orbit.translation_speed_x = orbit.translation_speed_y = (temp < prev) ? temp : (temp - prev);
-	orbit.translation_speed_x = temp - prev * ceil(1.0f - interpolation);
+// 	// orbit.translation_speed_x = orbit.translation_speed_y = (temp < prev) ? temp : (temp - prev);
+// 	orbit.translation_speed_x = temp - prev * ceil(1.0f - interpolation);
 
-	orbit.transX();
+// 	orbit.transX();
 
-	prev = temp;
-};
+// 	prev = temp;
+// };
 
 
 
-void thread_function (XGK::TransitionStack* _stack)
-{
-	XGK::TransitionStack& stack = *_stack;
+// void thread_function (XGK::TransitionStack* _stack)
+// {
+// 	XGK::TransitionStack& stack = *_stack;
 
-	while (render_flag)
-	{
-		stack.calculateFrametime();
-		stack.update();
-	}
-};
+// 	while (render_flag)
+// 	{
+// 		stack.calculateFrametime();
+// 		stack.update();
+// 	}
+// };
 
 
 
@@ -444,18 +444,18 @@ void glfw_key_callback (GLFWwindow* window, int key, int scancode, int action, i
 		{
 			render_flag = 0;
 		}
-		else if (key == GLFW_KEY_X)
-		{
-			orbit_transition.start2(1000000000, test);
-		}
-		else if (key == GLFW_KEY_A)
-		{
-			orbit_transition2.start2(1000000000, test2);
-		}
-		else if (key == GLFW_KEY_D)
-		{
-			orbit_transition2.start2(1000000000, test3);
-		}
+		// else if (key == GLFW_KEY_X)
+		// {
+		// 	orbit_transition.start2(1000000000, test);
+		// }
+		// else if (key == GLFW_KEY_A)
+		// {
+		// 	orbit_transition2.start2(1000000000, test2);
+		// }
+		// else if (key == GLFW_KEY_D)
+		// {
+		// 	orbit_transition2.start2(1000000000, test3);
+		// }
 		else if (key == GLFW_KEY_G)
 		{
 			initGL();
@@ -505,10 +505,10 @@ int main (void)
 
 
 
-	orbit.object.setTransZ(10.0f);
-	orbit.update();
+	// orbit.object.setTransZ(10.0f);
+	// orbit.update();
 
-	orbit.proj_mat.makeProjPersp(45.0f, 800.0f / 600.0f, 1.0f, 2000.0f, 1.0f);
+	// orbit.proj_mat.makeProjPersp(45.0f, 800.0f / 600.0f, 1.0f, 2000.0f, 1.0f);
 
 
 
@@ -519,27 +519,27 @@ int main (void)
 
 
 
-	XGK::MATH::UTIL::makeBezierCurve3Sequence2
-	(
-		curve_values,
-	  // 0,1,0,1,
-		.2,.97,.82,-0.97,
-	  1000000
-	);
+	// XGK::MATH::UTIL::makeBezierCurve3Sequence2
+	// (
+	// 	curve_values,
+	//   // 0,1,0,1,
+	// 	.2,.97,.82,-0.97,
+	//   1000000
+	// );
 
 
 
-	// const uint64_t thread_count = std::thread::hardware_concurrency() - 1;
-	const uint64_t thread_count = 5;
+	// // const uint64_t thread_count = std::thread::hardware_concurrency() - 1;
+	// const uint64_t thread_count = 5;
 
-	std::vector<XGK::TransitionStack*> stacks(thread_count);
-	std::vector<std::thread*> threads(thread_count);
+	// std::vector<XGK::TransitionStack*> stacks(thread_count);
+	// std::vector<std::thread*> threads(thread_count);
 
-	for (uint64_t i = 0; i < thread_count; ++i)
-	{
-		stacks[i] = new XGK::TransitionStack(64);
-		threads[i] = new std::thread(thread_function, stacks[i]);
-	}
+	// for (uint64_t i = 0; i < thread_count; ++i)
+	// {
+	// 	stacks[i] = new XGK::TransitionStack(64);
+	// 	threads[i] = new std::thread(thread_function, stacks[i]);
+	// }
 
 
 
@@ -581,12 +581,12 @@ int main (void)
 
 
 
-	for (uint64_t i = 0; i < thread_count; ++i)
-	{
-		threads[i]->join();
-		delete threads[i];
-		delete stacks[i];
-	}
+	// for (uint64_t i = 0; i < thread_count; ++i)
+	// {
+	// 	threads[i]->join();
+	// 	delete threads[i];
+	// 	delete stacks[i];
+	// }
 
 
 
