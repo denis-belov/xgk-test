@@ -17,8 +17,9 @@
 
 #include "GLFW/glfw3.h"
 
-#include "xgk-math/src/data/mat4/mat4.h"
+#include "xgk-math/src/mat4/mat4.h"
 #include "xgk-math/src/object/object.h"
+#include "xgk-math/src/orbit/orbit.h"
 // #include "xgk-math/src/util/util.h"
 
 // #include "xgk-aux/src/transition-stack/transition-stack.h"
@@ -26,13 +27,13 @@
 
 
 
-namespace XGK
-{
-	namespace DATA
-	{
-		extern const uint8_t FLOAT_SIZE_4;
-	}
-}
+// namespace XGK
+// {
+// 	namespace DATA
+// 	{
+// 		extern const uint8_t FLOAT_SIZE_4;
+// 	}
+// }
 
 
 
@@ -154,69 +155,6 @@ namespace TIME
 
 
 
-namespace ORBIT
-{
-	struct alignas(16) Orbit
-	{
-		XGK::DATA::Mat4 proj_mat;
-		XGK::DATA::Mat4 view_mat;
-
-		XGK::Object object;
-
-		float rotation_speed_x;
-		float rotation_speed_y;
-
-		float translation_speed_x;
-		float translation_speed_y;
-		float translation_speed_z;
-
-
-
-		Orbit (void);
-		void rotate (void);
-		void transX (void);
-		void transZ (void);
-		void update (void);
-	};
-
-	Orbit::Orbit (void)
-	{
-		rotation_speed_x = 0.0f;
-		rotation_speed_y = 0.0f;
-
-		translation_speed_x = 0.0f;
-		translation_speed_y = 0.0f;
-		translation_speed_z = 0.0f;
-	}
-
-	void Orbit::rotate (void)
-	{
-		object.postRotX(rotation_speed_x);
-		object.preRotY(rotation_speed_y);
-	}
-
-	void Orbit::transX (void)
-	{
-		object.transX(translation_speed_x);
-	}
-
-	void Orbit::transZ (void)
-	{
-		object.transZ(translation_speed_z);
-	}
-
-	void Orbit::update (void)
-	{
-		object.update2();
-
-		view_mat = object.mat;
-
-		// view_mat.invns();
-	}
-};
-
-
-
 uint8_t gui_g = 0;
 
 
@@ -225,7 +163,7 @@ uint8_t gui_g = 0;
 // XGK::Transition orbit_transition2;
 float curve_values[1000000];
 
-ORBIT::Orbit orbit;
+XGK::MATH::Orbit orbit;
 
 
 
@@ -496,12 +434,12 @@ int main (void)
 
 
 
-	// XGK::DATA::VEC4::simd32();
-	// XGK::DATA::QUAT::simd32();
-	// XGK::DATA::MAT4::simd32();
-	// XGK::DATA::VEC4::simd128();
-	// XGK::DATA::QUAT::simd128();
-	// XGK::DATA::MAT4::simd128();
+	// XGK::MATH::VEC4::simd32();
+	// XGK::MATH::QUAT::simd32();
+	// XGK::MATH::MAT4::simd32();
+	// XGK::MATH::VEC4::simd128();
+	// XGK::MATH::QUAT::simd128();
+	// XGK::MATH::MAT4::simd128();
 
 
 
