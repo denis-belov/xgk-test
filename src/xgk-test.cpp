@@ -9,7 +9,6 @@
 #include <vector>
 #include <thread>
 #include <mutex>
-#include <chrono>
 
 #if defined(_WIN64)
 	#include <windows.h>
@@ -20,6 +19,8 @@
 #include "xgk-math/src/mat4/mat4.h"
 #include "xgk-math/src/object/object.h"
 #include "xgk-math/src/orbit/orbit.h"
+
+#include "xgk-aux/src/meas/meas.h"
 // #include "xgk-math/src/util/util.h"
 
 // #include "xgk-aux/src/transition-stack/transition-stack.h"
@@ -27,131 +28,8 @@
 
 
 
-// namespace XGK
-// {
-// 	namespace DATA
-// 	{
-// 		extern const uint8_t FLOAT_SIZE_4;
-// 	}
-// }
-
-
-
 using std::cout;
 using std::endl;
-
-
-
-namespace TIME
-{
-	void getFramerate (void)
-	{
-		using namespace std::chrono;
-
-		static const time_point<system_clock> start_time = system_clock::now();
-		static time_point<system_clock> program_time = system_clock::now();
-		static uint64_t now_seconds = 0;
-		static uint64_t last_seconds = 0;
-		static uint64_t frames = 0;
-
-		++frames;
-		program_time = system_clock::now();
-		now_seconds = duration_cast<seconds>(program_time - start_time).count();
-
-		if ((now_seconds - last_seconds) != 0)
-		{
-			last_seconds = now_seconds;
-
-			#if defined(__linux__)
-				printf("\x1B[32mFPS: %lu                             \e[?25l\x1B[0m\r", frames);
-			#elif defined(_WIN64)
-				printf("\x1B[32mFPS: %llu                            \x1B[0m\r", frames);
-			#endif
-
-			fflush(stdout);
-
-			frames = 0;
-		}
-	}
-
-	void getAverageFrametime (void)
-	{
-		using namespace std::chrono;
-
-		static time_point<system_clock> start_time = system_clock::now();
-		static time_point<system_clock> program_time = system_clock::now();
-		static uint64_t now_seconds = 0;
-		static uint64_t frames = 0;
-
-		++frames;
-		program_time = system_clock::now();
-		now_seconds = duration_cast<seconds>(program_time - start_time).count();
-
-		if (now_seconds != 0)
-		{
-			#if defined(__linux__)
-				printf("\x1B[32mAverage frametime: %fs                            \e[?25l\x1B[0m\r", (double) now_seconds / ((double) frames));
-			#elif defined(_WIN64)
-				printf("\x1B[32mAverage frametime: %fs                            \x1B[0m\r", (double) now_seconds / ((double) frames));
-			#endif
-
-			fflush(stdout);
-
-			start_time = system_clock::now();
-			program_time = system_clock::now();
-			now_seconds = 0;
-			frames = 0;
-		}
-	}
-
-	void getTime (void)
-	{
-		using namespace std::chrono;
-
-		static time_point<system_clock> program_time;
-		static time_point<system_clock> last_program_time;
-
-		program_time = system_clock::now();
-
-		const uint64_t nanosecond_count = duration_cast<nanoseconds>(program_time - last_program_time).count();
-
-		last_program_time = program_time;
-	}
-
-	void getTime2 (void)
-	{
-		using namespace std::chrono;
-
-		static time_point<system_clock> program_time;
-		static time_point<system_clock> last_program_time;
-
-		program_time = system_clock::now();
-
-		const uint64_t nanosecond_count = duration_cast<nanoseconds>(program_time - last_program_time).count();
-
-		last_program_time = program_time;
-
-		#if defined(__linux__)
-			printf("Time: %lu\n", nanosecond_count);
-		#elif defined(_WIN64)
-			printf("Time: %llu\n", nanosecond_count);
-		#endif
-	}
-
-	void calculateFrametime (uint64_t* frame_time)
-	{
-		using namespace std::chrono;
-
-		static time_point<system_clock> program_time;
-		static time_point<system_clock> last_program_time;
-
-		program_time = system_clock::now();
-
-		*frame_time = duration_cast<nanoseconds>(program_time - last_program_time).count();
-
-		last_program_time = program_time;
-	}
-}
 
 
 
@@ -225,73 +103,6 @@ const float* _vertices = vertices;
 extern const uint32_t vertices_size = sizeof(vertices);
 
 
-
-float BezierCubicCurve (const float time, const float x1, const float y1, const float x2, const float y2)
-{
-	// B(t) = (1-t)^3*p0 + 3*t*(1-t)^2*p1 + 3*t^2*(1-t)*p2 + t^3*p3
-	// x(t) = (1-t)^3*x0 + 3*t*(1-t)^2*x1 + 3*t^2*(1-t)*x2 + t^3*x3
-	// y(t) = (1-t)^3*y0 + 3*t*(1-t)^2*y1 + 3*t^2*(1-t)*y2 + t^3*y3
-	// p0 = vec2(0,0), p3 = vec2(1,1)
-	// x(t) = 3*t*(1-t)^2*x1 + 3*t^2*(1-t)*x2 + t^3
-	const float a = 3 * x1 - 3 * x2 + 1;
-	const float b = 3 * x2 - 6 * x1;
-	const float c = 3 * x1;
-	const float d = - time;
-	// x(t) = a*t^3 + b*t^2 + c*t
-	// x(t) = time => a*t^3 + b*t^2 + c*t - d = 0
-	const float A = b / a;
-	const float B = c / a;
-	const float C = d / a;
-	const float Q = ( 3 * B - A*A ) / 9;
-	const float R = ( 9 * A * B - 27 * C - 2 * A*A*A ) / 54;
-	const float D = Q*Q*Q + R*R; // discriminant
-	float t;
-
-	if ( D >= 0 )
-	{
-		// float asd = 0;
-		// if (R + sqrt( D ) > 0) {
-
-		// 	asd = 1;
-		// }
-		// else if (R + sqrt( D ) < 0) {
-
-		// 	asd = -1;
-		// }
-
-		// float qwe = 0;
-		// if (R - sqrt( D ) > 0) {
-
-		// 	qwe = 1;
-		// }
-		// else if (R - sqrt( D ) < 0) {
-
-		// 	qwe = -1;
-		// }
-
-		// const float S = asd * pow( abs( R + sqrt( D ) ), 1 / 3 );
-		// const float T = qwe * pow( abs( R - sqrt( D ) ), 1 / 3 );
-		const float sqrtD = sqrt( D );
-		const float S = cbrt(R + sqrtD);
-		const float T = cbrt(R - sqrtD);
-		t = - A / 3 + ( S + T );
-	}
-	else
-	{
-		const float th = acos( R / sqrt( - pow( Q, 3 ) ) );
-		const float t1 = 2 * sqrt( - Q ) * cos( th / 3 ) - A / 3;
-		const float t2 = 2 * sqrt( - Q ) * cos( th / 3 + 2 * M_PI / 3 ) - A / 3;
-		const float t3 = 2 * sqrt( - Q ) * cos( th / 3 - 2 * M_PI / 3 ) - A / 3;
-		if ( t1 >= 0 && t1 <= 1 ) t = t1;
-		else if ( t2 >= 0 && t2 <= 1 ) t = t2;
-		else if ( t3 >= 0 && t3 <= 1 ) t = t3;
-	}
-	float y;
-	if ( t == 0 ) y = 0;
-	else if ( t == 1 ) y = 1;
-	else y = 3 * t * pow( 1 - t, 2 ) * y1 + 3 * t*t * ( 1 - t ) * y2 + t*t*t;
-	return y;
-};
 
 // void test (const float interpolation)
 // {
@@ -404,15 +215,15 @@ void glfw_key_callback (GLFWwindow* window, int key, int scancode, int action, i
 		}
 		else if (key == GLFW_KEY_P)
 		{
-			gui_g = 1 - gui_g;
+			gui_g = !gui_g;
 		}
 	}
-};
+}
 
 void glfw_error_callback (int error, const char* description)
 {
 	fprintf(stderr, "Error: %s\n", description);
-};
+}
 
 
 
@@ -431,15 +242,6 @@ int main (void)
 		}
 	#endif
 	//
-
-
-
-	// XGK::MATH::VEC4::simd32();
-	// XGK::MATH::QUAT::simd32();
-	// XGK::MATH::MAT4::simd32();
-	// XGK::MATH::VEC4::simd128();
-	// XGK::MATH::QUAT::simd128();
-	// XGK::MATH::MAT4::simd128();
 
 
 
@@ -483,8 +285,8 @@ int main (void)
 
 	while (render_flag)
 	{
-		// TIME::getFramerate();
-		// TIME::getAverageFrametime();
+		XGK::AUX::MEAS::getFramerate();
+		// XGK::AUX::MEAS::getAverageFrametime();
 
 		glfwPollEvents();
 
@@ -492,30 +294,6 @@ int main (void)
 
 		loop_function();
 	}
-
-
-
-	// float a = 0.0f;
-	// float b = 0.0f;
-
-	// std::chrono::time_point<std::chrono::system_clock> t1 = std::chrono::system_clock::now();
-
-	// for (size_t i = 0; i < 9999999; ++i)
-	// {
-	// 	b += BezierCubicCurve(((float) i) / 9999999.0f, .2,.97,.82,-0.97);
-	// }
-
-	// std::chrono::time_point<std::chrono::system_clock> t2 = std::chrono::system_clock::now();
-
-	// for (size_t i = 0; i < 9999999; ++i)
-	// {
-	// 	a += curve_values[uint64_t(((float) i) / 9999999.0f * 1000000.0f)];
-	// }
-
-	// std::chrono::time_point<std::chrono::system_clock> t3 = std::chrono::system_clock::now();
-
-	// cout << "a: " << a << " " << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count() << endl;
-	// cout << "b: " << b << " " << std::chrono::duration_cast<std::chrono::nanoseconds>(t3 - t2).count() << endl;
 
 
 
@@ -537,4 +315,4 @@ int main (void)
 
 
 	return 0;
-};
+}
