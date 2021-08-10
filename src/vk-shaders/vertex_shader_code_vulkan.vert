@@ -31,7 +31,7 @@ void main (void)
 
 	gl_Position = cam[1].proj_mat * cam2[0].view_mat * vec4(vertex_data * 2.0, 1.0);
 
-	gl_Position = vec4(vertex_data * 2.0, 1.0);
+	// gl_Position = vec4(vertex_data * 2.0, 1.0);
 
 	// vulkan has opposite Y direction with opengl
 	gl_Position.y = - gl_Position.y;
