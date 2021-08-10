@@ -285,8 +285,8 @@ int main (void)
 
 	while (render_flag)
 	{
-		XGK::AUX::MEAS::getFramerate();
-		// XGK::AUX::MEAS::getAverageFrametime();
+		XGK::AUX::MEAS::printFramerate();
+		// XGK::AUX::MEAS::printAverageFrametime();
 
 		glfwPollEvents();
 
