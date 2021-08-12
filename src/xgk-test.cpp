@@ -33,7 +33,7 @@ using std::endl;
 
 
 
-uint8_t gui_g = 0;
+uint8_t gui_g {};
 
 
 
@@ -47,11 +47,11 @@ XGK::MATH::Orbit orbit;
 
 // std::mutex orbit_mutex;
 // replace by atomic
-volatile uint8_t render_flag = 1;
+volatile uint8_t render_flag { 1 };
 
 
 
-const float vertices[] =
+extern const float vertices []
 {
 	-1.0f,-1.0f,-1.0f,
 	-1.0f,-1.0f, 1.0f,
@@ -91,16 +91,7 @@ const float vertices[] =
 	1.0f,-1.0f, 1.0f
 };
 
-// const float vertices[] =
-// {
-// 	-1.0f, -1.0f, 0.0f,
-// 	0.0f, 1.0f, 0.0f,
-// 	1.0f, -1.0f, 0.0f
-// };
-
-const float* _vertices = vertices;
-
-extern const uint32_t vertices_size = sizeof(vertices);
+extern const uint32_t vertices_size { sizeof(vertices) };
 
 
 
@@ -165,11 +156,11 @@ extern const uint32_t vertices_size = sizeof(vertices);
 
 
 
-void idle_function (void) {};
+void idle_function (void) {}
 
-void (* loop_function) (void) = idle_function;
+void (* loop_function) (void) { idle_function };
 
-void (* destroy_api_function) (void) = idle_function;
+void (* destroy_api_function) (void) { idle_function };
 
 
 
@@ -183,7 +174,7 @@ void initGL (void);
 
 
 
-GLFWwindow* window = nullptr;
+GLFWwindow* window {};
 
 void glfw_key_callback (GLFWwindow* window, int key, int scancode, int action, int mods)
 {
@@ -232,11 +223,11 @@ int main (void)
 	// hiding cursor in Windows console
 	#if defined(_WIN64)
 		{
-			HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
+			HANDLE console { GetStdHandle(STD_OUTPUT_HANDLE) };
 			CONSOLE_CURSOR_INFO console_cursor_info;
 
-			console_cursor_info.bVisible = FALSE;
-			console_cursor_info.dwSize = 1;
+			console_cursor_info.bVisible { FALSE };
+			console_cursor_info.dwSize { 1 };
 
 			SetConsoleCursorInfo(console, &console_cursor_info);
 		}
@@ -284,14 +275,17 @@ int main (void)
 
 
 
+	uint64_t frame_time {};
+
 	while (render_flag)
 	{
-		XGK::AUX::MEAS::printFramerate();
+		// XGK::AUX::MEAS::printFramerate();
 		// XGK::AUX::MEAS::printAverageFrametime();
+		XGK::AUX::MEAS::calculateFrametime(&frame_time);
 
 		glfwPollEvents();
 
-		orbit.object.preRotY(0.0001f);
+		orbit.object.preRotY(0.000000001f * ((float) frame_time));
 		orbit.update();
 
 		loop_function();

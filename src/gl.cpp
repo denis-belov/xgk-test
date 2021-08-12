@@ -72,7 +72,7 @@ R"(
 
 
 
-extern const float* _vertices;
+extern const float vertices [];
 extern const uint32_t vertices_size;
 extern void (* loop_function) (void);
 extern void (* destroy_api_function) (void);
@@ -243,11 +243,11 @@ void initGL (void)
 		// GLuint vertex_buffer;
 		glGenBuffers(1, &vertex_buffer);
 		glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-		glBufferData(GL_ARRAY_BUFFER, vertices_size, _vertices, GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, vertices_size, vertices, GL_DYNAMIC_DRAW);
 
 		glGenBuffers(1, &vertex_buffer2);
 		glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer2);
-		glBufferData(GL_ARRAY_BUFFER, vertices_size, _vertices, GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, vertices_size, vertices, GL_DYNAMIC_DRAW);
 
 		GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
 		glShaderSource(vertex_shader, 1, &vertex_shader_code_opengl, nullptr);
