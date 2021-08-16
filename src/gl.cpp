@@ -77,13 +77,10 @@ extern const uint32_t vertices_size;
 extern void (* loop_function) (void);
 extern void (* destroy_api_function) (void);
 extern GLFWwindow* window;
-// extern struct ORBIT::Orbit orbit;
-namespace ORBIT
-{
-	struct Orbit;
-};
 
-extern ORBIT::Orbit orbit;
+struct Orbit;
+
+extern Orbit orbit;
 
 void idle_function (void);
 void glfw_key_callback (GLFWwindow*, int, int, int, int);
@@ -99,17 +96,6 @@ GLuint program = 0;
 // GUI
 ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 //
-
-
-
-namespace TIME
-{
-	struct Time;
-
-	void getTime (Time* time);
-};
-
-extern TIME::Time _time;
 
 
 
