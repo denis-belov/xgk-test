@@ -9,6 +9,7 @@
 #include <vector>
 #include <thread>
 #include <mutex>
+#include <unistd.h>
 
 #if defined(_WIN64)
 	#include <windows.h>
@@ -38,7 +39,7 @@ uint8_t gui_g {};
 
 XGK::Transition orbit_transition;
 XGK::Transition orbit_transition2;
-float curve_values[1000000];
+float curve_values[1000];
 
 XGK::MATH::Orbit orbit;
 
@@ -94,33 +95,75 @@ extern const size_t vertices_size { sizeof(vertices) };
 
 
 
-void test (const float& interpolation)
+void test (const size_t& time_gone)
 {
-	static float prev {};
+	static size_t prev_time {};
 
-	// float temp = 0.00000314f * curve_values[size_t(interpolation * 1000000.0f)];
-	// float temp = 0.000000314f * curve_values[size_t(interpolation * 1000.0f)];
-	float temp { (3.14f / 1000000000) * (curve_values[size_t(interpolation * 1000000.0f)] * 1000000000) };
+	float temp { curve_values[(time_gone / 1000000) - 1] };
 
-	orbit.rotation_speed_x = (temp < prev) ? temp : (temp - prev);
-	// orbit.rotation_speed_x = temp - prev * ceil(1.0f - interpolation);
+	if (time_gone < prev_time)
+	{
+		prev_time = 0;
+	}
 
-	// cout << temp - prev << endl;
+	orbit.rotation_speed_x = orbit.rotation_speed_y = temp * float(time_gone - prev_time);
 
-	prev = temp;
+	prev_time = time_gone;
 
 	orbit.rotate();
+}
+
+void test2 (const size_t& time_gone)
+{
+	static size_t prev_time {};
+
+	float temp { curve_values[(time_gone / 1000000) - 1] };
+
+	if (time_gone < prev_time)
+	{
+		prev_time = 0;
+	}
+
+	orbit.translation_speed_z = temp * float(time_gone - prev_time) * 10.0f;
+
+	prev_time = time_gone;
+
+	orbit.transZ();
+}
+
+void test3 (const size_t& time_gone)
+{
+	static size_t prev_time {};
+
+	float temp { curve_values[(time_gone / 1000000) - 1] };
+
+	if (time_gone < prev_time)
+	{
+		prev_time = 0;
+	}
+
+	orbit.translation_speed_z = temp * float(time_gone - prev_time);
+
+	prev_time = time_gone;
+
+	orbit.transZ();
 }
 
 
 
 void thread_function (XGK::TransitionStack* _stack)
 {
-	XGK::TransitionStack& stack = *_stack;
+	XGK::TransitionStack& stack { *_stack };
 
 	while (render_flag)
 	{
 		stack.calculateFrametime();
+
+		if (stack.frame_time < 100000)
+		{
+			continue;
+		}
+
 		stack.update();
 	}
 }
@@ -160,6 +203,10 @@ void glfw_key_callback (GLFWwindow* window, int key, int scancode, int action, i
 		else if (key == GLFW_KEY_X)
 		{
 			orbit_transition.start2(1000000000, test);
+		}
+		else if (key == GLFW_KEY_Z)
+		{
+			orbit_transition2.start2(1000000000, test2);
 		}
 		else if (key == GLFW_KEY_G)
 		{
@@ -215,24 +262,46 @@ int main (void)
 
 
 
-	XGK::MATH::UTIL::makeBezierCurve3Sequence2
-	(
-		curve_values,
-		.49,.23,.51,.98,
-		// 0, 1, 1, 1,
-	  1000000
-	);
-
-	// XGK::MATH::UTIL::makeBezierCurve3Sequence
+	// XGK::MATH::UTIL::makeBezierCurve3Sequence2
 	// (
 	// 	curve_values,
-	// 	1, 1, 1, 1, 1, 1, 1, 1,
+	// 	// .49,.23,.51,.98,
+	// 	0,.5,.5,1,
+	// 	// 0, 1, 1, 1,
 	// 	1000000
 	// );
 
+	XGK::MATH::UTIL::makeBezierCurve3Sequence
+	(
+		curve_values,
+
+		// 0.0000001f, 0.0000001f, 0.0000001f, 0.0f, 0.00000005f, 0.0f, 0.0f, 0.0f,
+
+		1.0f * 3.14f * 0.000000001f,
+		1.0f * 3.14f * 0.000000001f,
+		1.0f * 3.14f * 0.000000001f,
+		0.0f,
+		0.5f * 3.14f * 0.000000001f,
+		0.0f,
+		0.0f,
+		0.0f,
+
+		// 1.0f * 3.14f / 1000000000.0f,
+		// 1.0f * 3.14f / 1000000000.0f,
+		// 1.0f * 3.14f / 1000000000.0f,
+		// 1.0f * 3.14f / 1000000000.0f,
+		// 1.0f * 3.14f / 1000000000.0f,
+		// 1.0f * 3.14f / 1000000000.0f,
+		// 1.0f * 3.14f / 1000000000.0f,
+		// 1.0f * 3.14f / 1000000000.0f,
 
 
-	// for (size_t i {}; i < 1000000; ++i)
+		1000
+	);
+
+
+
+	// for (size_t i {}; i < 1000; ++i)
 	// {
 	// 	cout << curve_values[i] << endl;
 	// }
@@ -240,12 +309,12 @@ int main (void)
 
 
 	// // const size_t thread_count = std::thread::hardware_concurrency() - 1;
-	const size_t thread_count = 5;
+	const size_t thread_count { 5 };
 
 	std::vector<XGK::TransitionStack*> stacks(thread_count);
 	std::vector<std::thread*> threads(thread_count);
 
-	for (size_t i = 0; i < thread_count; ++i)
+	for (size_t i {}; i < thread_count; ++i)
 	{
 		stacks[i] = new XGK::TransitionStack(64);
 		threads[i] = new std::thread(thread_function, stacks[i]);
@@ -270,7 +339,7 @@ int main (void)
 
 
 
-	for (size_t i = 0; i < thread_count; ++i)
+	for (size_t i {}; i < thread_count; ++i)
 	{
 		threads[i]->join();
 
