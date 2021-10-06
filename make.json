@@ -1,5 +1,5 @@
 {
-	"build_type": "bin",
+	"build_type": "static",
 
 	"target_name": "xgk-test",
 
@@ -11,7 +11,9 @@
 			"REPS": "/home/denis/reps",
 
 			"MAKE_H": "mkdir -p $(BUILD)/h",
-			"MAKE_SPV": "mkdir -p $(BUILD)/spv"
+			"MAKE_SPV": "mkdir -p $(BUILD)/spv",
+
+			"CUSTOM_CPPFLAGS": "-fPIC"
 		}
 	},
 
@@ -21,7 +23,7 @@
 		"$(LIBS)",
 		"$(LIBS)/glad/include",
 		"$(REPS)/ocornut/imgui",
-		"$(LIBS)/glfw-3.3.2/include",
+		"$(LIBS)/glfw-3.3.4/include",
 		"$(REPS)/denis-belov",
 		"$(REPS)/denis-belov/xgk-test/build/gcc-x64/h",
 		"$(REPS)/denis-belov/xgk-math/src",
@@ -42,7 +44,7 @@
 
 	"static_libraries":
 	[
-		"$(LIBS)/glfw-3.3.2/src/libglfw3",
+		"$(LIBS)/glfw-3.3.4/build/src/libglfw3",
 		"$(REPS)/denis-belov/xgk-math/build/gcc-x64/output/a/xgk-math",
 		"$(REPS)/denis-belov/xgk-aux/build/gcc-x64/output/a/xgk-aux"
 	],
@@ -99,7 +101,7 @@
 			[
 				{
 					"source": "$(LIBS)/glad/src/glad.c",
-					"flags": "-w"
+					"flags": "-w $(CUSTOM_CPPFLAGS)"
 				},
 
 				"$(REPS)/ocornut/imgui/imgui.cpp",

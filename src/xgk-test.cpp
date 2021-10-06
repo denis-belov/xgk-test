@@ -39,7 +39,7 @@ uint8_t gui_g {};
 
 XGK::Transition orbit_transition;
 XGK::Transition orbit_transition2;
-float curve_values[1000];
+float curve_values [1000000];
 
 XGK::MATH::Orbit orbit;
 
@@ -88,7 +88,7 @@ extern const float vertices []
 	-1.0f, 1.0f, 1.0f,
 	1.0f, 1.0f, 1.0f,
 	-1.0f, 1.0f, 1.0f,
-	1.0f,-1.0f, 1.0f
+	1.0f,-1.0f, 1.0f,
 };
 
 extern const size_t vertices_size { sizeof(vertices) };
@@ -99,7 +99,7 @@ void test (const size_t& time_gone)
 {
 	static size_t prev_time {};
 
-	float temp { curve_values[(time_gone / 1000000) - 1] };
+	float temp { curve_values[(time_gone / 1000) - 1] };
 
 	if (time_gone < prev_time)
 	{
@@ -117,7 +117,7 @@ void test2 (const size_t& time_gone)
 {
 	static size_t prev_time {};
 
-	float temp { curve_values[(time_gone / 1000000) - 1] };
+	float temp { curve_values[(time_gone / 1000) - 1] };
 
 	if (time_gone < prev_time)
 	{
@@ -135,7 +135,7 @@ void test3 (const size_t& time_gone)
 {
 	static size_t prev_time {};
 
-	float temp { curve_values[(time_gone / 1000000) - 1] };
+	float temp { curve_values[(time_gone / 1000) - 1] };
 
 	if (time_gone < prev_time)
 	{
@@ -190,6 +190,27 @@ void initGL (void);
 
 
 
+void initOrbit ()
+{
+	orbit.object.setTransZ(10.0f);
+	orbit.update();
+
+	orbit.proj_mat.makeProjPersp(45.0f, 800.0f / 600.0f, 1.0f, 2000.0f, 1.0f);
+}
+
+void tran (const float& value_x, const float& value_y)
+{
+	// orbit.rotation_speed_x = orbit.rotation_speed_y = 0.5f;
+	orbit.rotation_speed_y = value_x;
+	orbit.rotation_speed_x = value_y;
+
+	orbit.rotate();
+	orbit.update();
+	// orbit_transition.start2(1000000000, test);
+}
+
+
+
 GLFWwindow* window {};
 
 void glfw_key_callback (GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -230,7 +251,7 @@ void glfw_error_callback (int error, const char* description)
 
 
 
-int main (void)
+int _main (void)
 {
 	// hiding cursor in Windows console
 	#if defined(_WIN64)
@@ -248,10 +269,7 @@ int main (void)
 
 
 
-	orbit.object.setTransZ(10.0f);
-	orbit.update();
-
-	orbit.proj_mat.makeProjPersp(45.0f, 800.0f / 600.0f, 1.0f, 2000.0f, 1.0f);
+	initOrbit();
 
 
 
@@ -262,14 +280,14 @@ int main (void)
 
 
 
-	// XGK::MATH::UTIL::makeBezierCurve3Sequence2
-	// (
-	// 	curve_values,
-	// 	// .49,.23,.51,.98,
-	// 	0,.5,.5,1,
-	// 	// 0, 1, 1, 1,
-	// 	1000000
-	// );
+	XGK::MATH::UTIL::makeBezierCurve3Sequence2
+	(
+		curve_values,
+		// .49,.23,.51,.98,
+		0,.5,.5,1,
+		// 0, 1, 1, 1,
+		1000000
+	);
 
 	XGK::MATH::UTIL::makeBezierCurve3Sequence
 	(
@@ -296,7 +314,7 @@ int main (void)
 		// 1.0f * 3.14f / 1000000000.0f,
 
 
-		1000
+		1000000
 	);
 
 
@@ -322,20 +340,20 @@ int main (void)
 
 
 
-	size_t frame_time {};
+	// size_t frame_time {};
 
-	while (render_flag)
-	{
-		// XGK::AUX::MEAS::printFramerate();
-		// XGK::AUX::MEAS::printAverageFrametime();
-		// XGK::AUX::MEAS::calculateFrametime(&frame_time);
+	// while (render_flag)
+	// {
+	// 	// XGK::AUX::MEAS::printFramerate();
+	// 	// XGK::AUX::MEAS::printAverageFrametime();
+	// 	// XGK::AUX::MEAS::calculateFrametime(&frame_time);
 
-		glfwPollEvents();
+	// 	glfwPollEvents();
 
-		orbit.update();
+	// 	orbit.update();
 
-		loop_function();
-	}
+	// 	loop_function();
+	// }
 
 
 
