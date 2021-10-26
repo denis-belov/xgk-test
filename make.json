@@ -22,7 +22,6 @@
 		"$(SRC)",
 		"$(LIBS)",
 		"$(LIBS)/glad/include",
-		"$(REPS)/ocornut/imgui",
 		"$(LIBS)/glfw-3.3.4/include",
 		"$(REPS)/denis-belov",
 		"$(REPS)/denis-belov/xgk-test/build/gcc-x64/h",
@@ -45,14 +44,18 @@
 	"static_libraries":
 	[
 		"$(LIBS)/glfw-3.3.4/build/src/libglfw3",
-		"$(REPS)/denis-belov/xgk-math/build/gcc-x64/output/a/xgk-math",
-		"$(REPS)/denis-belov/xgk-aux/build/gcc-x64/output/a/xgk-aux"
-	],
 
-	"static_libraries2":
-	[
-		"$(REPS)/denis-belov/xgk-math",
-		"$(REPS)/denis-belov/xgk-aux"
+		{
+			"library": "$(REPS)/denis-belov/xgk-math/build/gcc-x64/output/a/xgk-math",
+			"watch": "$(REPS)/denis-belov/xgk-math/src",
+			"do": "/home/denis/.nvm/versions/node/v14.4.0/bin/node $(REPS)/denis-belov/c-build/src/genmake gcc-x64 $(REPS)/denis-belov/xgk-math/make.json"
+		},
+
+		{
+			"library": "$(REPS)/denis-belov/xgk-aux/build/gcc-x64/output/a/xgk-aux",
+			"watch": "$(REPS)/denis-belov/xgk-aux/src",
+			"do": "/home/denis/.nvm/versions/node/v14.4.0/bin/node $(REPS)/denis-belov/c-build/src/genmake gcc-x64 $(REPS)/denis-belov/xgk-aux/make.json"
+		}
 	],
 
 	"source_files":
@@ -102,14 +105,7 @@
 				{
 					"source": "$(LIBS)/glad/src/glad.c",
 					"flags": "-w $(CUSTOM_CPPFLAGS)"
-				},
-
-				"$(REPS)/ocornut/imgui/imgui.cpp",
-				"$(REPS)/ocornut/imgui/imgui_widgets.cpp",
-				"$(REPS)/ocornut/imgui/imgui_draw.cpp",
-				"$(REPS)/ocornut/imgui/examples/imgui_impl_glfw.cpp",
-				"$(REPS)/ocornut/imgui/examples/imgui_impl_opengl3.cpp",
-				"$(REPS)/ocornut/imgui/examples/imgui_impl_vulkan.cpp"
+				}
 			]
 		}
 	}

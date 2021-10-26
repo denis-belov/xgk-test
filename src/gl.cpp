@@ -4,15 +4,7 @@
 
 #include <iostream>
 
-// // GUI
-// #define IMGUI_IMPL_OPENGL_LOADER_GLAD
-// #include "imgui.h"
-// #include "examples/imgui_impl_glfw.h"
-// #include "examples/imgui_impl_opengl3.h"
-// //
-
 #include "glad/glad.h"
-
 #include "GLFW/glfw3.h"
 
 
@@ -90,7 +82,6 @@ void glfw_key_callback (GLFWwindow*, int, int, int, int);
 
 GLuint vertex_buffer {};
 GLuint framebuffer {};
-GLuint framebuffer_texture {};
 GLuint framebuffer_renderbuffer_color {};
 GLuint framebuffer_renderbuffer_depth {};
 GLuint pixel_pack_buffer {};
@@ -98,66 +89,13 @@ GLuint program {};
 
 
 
-// // GUI
-// ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-// //
-
-
-
 void loop_function_GL (void)
 {
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-
-
-
-	// GUI
-	extern uint8_t gui_g;
-
-	if (gui_g)
-	{
-		// ImGui_ImplOpenGL3_NewFrame();
-		// ImGui_ImplGlfw_NewFrame();
-		// ImGui::NewFrame();
-
-		// {
-		// 	static float f = 0.0f;
-		// 	static int counter = 0;
-
-		// 	ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
-
-		// 	ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-		// 	// ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-		// 	// ImGui::Checkbox("Another Window", &show_another_window);
-
-		// 	ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-		// 	ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-
-		// 	if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-		// 			counter++;
-		// 	ImGui::SameLine();
-		// 	ImGui::Text("counter = %d", counter);
-
-		// 	// ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-		// 	ImGui::End();
-		// }
-
-		// ImGui::Render();
-		// ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-	}
-	else
-	{
-		glBufferSubData(GL_UNIFORM_BUFFER, 64, 64, ((void*) &orbit) + 64);
-
-		// glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-		// glUseProgram(program);
-		glDrawArrays(GL_TRIANGLES, 0, vertices_size / 4);
-		// glUseProgram(0);
-	}
-
-
-
 	glfwSwapBuffers(window);
 }
+
+
 
 void* pixel_data {};
 
@@ -182,10 +120,12 @@ void loop_function_GL2 (void)
 	glUseProgram(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+	// glFinish();
+
 	// glBindBuffer(GL_PIXEL_PACK_BUFFER, pixel_pack_buffer);
-	glBufferData(GL_PIXEL_PACK_BUFFER, 800 * 600 * 4, nullptr, GL_DYNAMIC_READ);
+	glBufferData(GL_PIXEL_PACK_BUFFER, 800 * 800 * 4, nullptr, GL_DYNAMIC_READ);
 	// glReadBuffer(GL_COLOR_ATTACHMENT0);
-	glReadPixels(0, 0, 800, 600, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+	glReadPixels(0, 0, 800, 800, GL_RGBA, GL_UNSIGNED_BYTE, 0);
 
 	pixel_data = glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
 
@@ -203,16 +143,6 @@ void destroyGL (void)
 {
 	loop_function = idle_function;
 
-
-
-	// // GUI
-	// ImGui_ImplOpenGL3_Shutdown();
-	// ImGui_ImplGlfw_Shutdown();
-	// ImGui::DestroyContext();
-	// //
-
-
-
 	glFinish();
 
 	glfwDestroyWindow(window);
@@ -223,8 +153,6 @@ void destroyGL (void)
 void destroyGL2 (void)
 {
 	loop_function = idle_function;
-
-
 
 	glFinish();
 
@@ -256,19 +184,6 @@ void initGL (void)
 
 
 		gladLoadGL();
-
-
-
-		// // GUI
-		// IMGUI_CHECKVERSION();
-		// ImGui::CreateContext();
-		// ImGuiIO& io = ImGui::GetIO(); (void)io;
-		// ImGui::StyleColorsDark();
-
-		// // Setup Platform/Renderer bindings
-		// ImGui_ImplGlfw_InitForOpenGL(window, false);
-		// ImGui_ImplOpenGL3_Init("#version 130");
-		// //
 
 
 
@@ -320,7 +235,7 @@ void initGL (void)
 	}
 }
 
-void initGL2 (void)
+void initGL2 (const size_t& window_x, const size_t& window_y)
 {
 	if (destroy_api_function != destroyGL)
 	{
@@ -338,7 +253,7 @@ void initGL2 (void)
 		glfwHideWindow(window);
 
 		glfwMakeContextCurrent(window);
-		glfwSwapInterval(1);
+		// glfwSwapInterval(1);
 
 
 
@@ -346,7 +261,7 @@ void initGL2 (void)
 
 
 
-		glViewport(0, 0, 800, 600);
+		glViewport(0, 0, window_x, window_y);
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LEQUAL);
 		glClearColor(0.125f, 0.125f, 0.125f, 1.0f);
@@ -365,6 +280,8 @@ void initGL2 (void)
 		glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
 		glBufferData(GL_ARRAY_BUFFER, vertices_size, vertices, GL_STATIC_DRAW);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+
 
 		// GLsizei l;
 		// GLchar log;
@@ -386,51 +303,27 @@ void initGL2 (void)
 		glAttachShader(program, fragment_shader);
 		glLinkProgram(program);
 
-		// glUseProgram(program);
-
 
 
 		glEnableVertexAttribArray(0);
-		// glVertexAttribPointer(0, 3, GL_FLOAT, 0, 0, 0);
 
 
 
 		glCreateRenderbuffers(1, &framebuffer_renderbuffer_color);
 		glBindRenderbuffer(GL_RENDERBUFFER, framebuffer_renderbuffer_color);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA8, 800, 600);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA8, window_x, window_y);
 		glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
 		glCreateRenderbuffers(1, &framebuffer_renderbuffer_depth);
 		glBindRenderbuffer(GL_RENDERBUFFER, framebuffer_renderbuffer_depth);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, 800, 600);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, window_x, window_y);
 		glBindRenderbuffer(GL_RENDERBUFFER, 0);
-
-		// glCreateTextures(GL_TEXTURE_2D, 1, &framebuffer_texture);
-		// glBindTexture(GL_TEXTURE_2D, framebuffer_texture);
-
-		// glTexImage2D
-		// (
-		// 	GL_TEXTURE_2D,
-		// 	0,
-		// 	GL_RGBA,
-		// 	800,
-		// 	600,
-		// 	0,
-		// 	GL_RGBA,
-		// 	GL_UNSIGNED_BYTE,
-		// 	nullptr
-		// );
-
-		// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		// glBindTexture(GL_TEXTURE_2D, 0);
 
 		glCreateFramebuffers(1, &framebuffer);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer);
 		glDrawBuffer(GL_COLOR_ATTACHMENT0);
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer);
 		glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, framebuffer_renderbuffer_color);
-		// glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebuffer_texture, 0);
 		glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, framebuffer_renderbuffer_depth);
 		// glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
@@ -439,11 +332,11 @@ void initGL2 (void)
 		glCreateBuffers(1, &pixel_pack_buffer);
 
 		glBindBuffer(GL_PIXEL_PACK_BUFFER, pixel_pack_buffer);
-		glBufferData(GL_PIXEL_PACK_BUFFER, 800 * 600 * 4, nullptr, GL_DYNAMIC_READ);
+		glBufferData(GL_PIXEL_PACK_BUFFER, window_x * window_y * 4, nullptr, GL_DYNAMIC_READ);
 
 		// Redundant call. GL_COLOR_ATTACHMENT0 is a default framebuffer read buffer.
 		glReadBuffer(GL_COLOR_ATTACHMENT0);
-		glReadPixels(0, 0, 800, 600, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+		glReadPixels(0, 0, window_x, window_y, GL_RGBA, GL_UNSIGNED_BYTE, 0);
 
 		pixel_data = glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
 

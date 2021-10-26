@@ -1,11 +1,11 @@
 # Generating makefile
 ## GCC x64
 ```
-node /home/denis/reps/denis-belov/c-build/src/makefiler gcc-x64 /home/denis/reps/denis-belov/xgk-test/make.json
+node /home/denis/reps/denis-belov/c-build/src/genmake gcc-x64 /home/denis/reps/denis-belov/xgk-test/make.json
 ```
 ## MSVC x64
 ```
-node /home/denis/reps/denis-belov/c-build/src/makefiler msvc-x64 /home/denis/reps/denis-belov/xgk-test/make.json
+node /home/denis/reps/denis-belov/c-build/src/genmake msvc-x64 /home/denis/reps/denis-belov/xgk-test/make.json
 ```
 
 # Running makefile

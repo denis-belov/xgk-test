@@ -33,10 +33,6 @@ using std::endl;
 
 
 
-uint8_t gui_g {};
-
-
-
 XGK::Transition orbit_transition;
 XGK::Transition orbit_transition2;
 float curve_values [1000000];
@@ -195,10 +191,10 @@ void initOrbit ()
 	orbit.object.setTransZ(10.0f);
 	orbit.update();
 
-	orbit.proj_mat.makeProjPersp(45.0f, 800.0f / 600.0f, 1.0f, 2000.0f, 1.0f);
+	orbit.proj_mat.makeProjPersp(45.0f, 800.0f / 800.0f, 1.0f, 2000.0f, 1.0f);
 }
 
-void tran (const float& value_x, const float& value_y)
+void rotateOrbit (const float& value_x, const float& value_y)
 {
 	// orbit.rotation_speed_x = orbit.rotation_speed_y = 0.5f;
 	orbit.rotation_speed_y = value_x;
@@ -237,10 +233,6 @@ void glfw_key_callback (GLFWwindow* window, int key, int scancode, int action, i
 		{
 			initVK();
 		}
-		else if (key == GLFW_KEY_P)
-		{
-			gui_g = !gui_g;
-		}
 	}
 }
 
@@ -259,8 +251,8 @@ int _main (void)
 			HANDLE console { GetStdHandle(STD_OUTPUT_HANDLE) };
 			CONSOLE_CURSOR_INFO console_cursor_info;
 
-			console_cursor_info.bVisible { FALSE };
-			console_cursor_info.dwSize { 1 };
+			console_cursor_info.bVisible = FALSE;
+			console_cursor_info.dwSize = 1;
 
 			SetConsoleCursorInfo(console, &console_cursor_info);
 		}

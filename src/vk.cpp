@@ -26,12 +26,6 @@
 
 #include "xgk-aux/src/api/vulkan.h"
 
-// GUI
-#include "imgui.h"
-#include "examples/imgui_impl_glfw.h"
-#include "examples/imgui_impl_vulkan.h"
-//
-
 #if defined(__GNUC__)
 	#include "vertex_shader_code_vulkan.h"
 	#include "fragment_shader_code_vulkan.h"
@@ -95,13 +89,6 @@ uint32_t curr_image {};
 
 
 
-// GUI
-VkDescriptorPool g_DescriptorPool { VK_NULL_HANDLE };
-ImGui_ImplVulkanH_Window g_MainWindowData;
-//
-
-
-
 void loop_function_VK (void)
 {
 	memcpy(vk_uniform_buffer_mem_addr + 64, ((void*) &orbit) + 64, 64);
@@ -122,55 +109,16 @@ void loop_function_VK (void)
 
 
 
-	// GUI
-	extern uint8_t gui_g;
+	vkCmdBindDescriptorSets(vk_cmd_buffers[curr_image], VK_PIPELINE_BIND_POINT_GRAPHICS, vk_ppl_layout, 0, 1, &vk_descr_set[0], 0, nullptr);
 
-	if (gui_g)
-	{
-	  vkCmdBeginRenderPass(vk_cmd_buffers[curr_image], &vk_render_pass_bi[curr_image], VK_SUBPASS_CONTENTS_INLINE);
+	vkCmdBindVertexBuffers(vk_cmd_buffers[curr_image], 0, 1, &vk_vertex_buffer, &vk_vertex_buffer_offset);
+	vkCmdBeginRenderPass(vk_cmd_buffers[curr_image], &vk_render_pass_bi[curr_image], VK_SUBPASS_CONTENTS_INLINE);
+	// vkCmdBindDescriptorSets(vk_cmd_buffers[curr_image], VK_PIPELINE_BIND_POINT_GRAPHICS, vk_ppl_layout, 0, 1, &vk_descr_set[0], 0, nullptr);
+	vkCmdBindPipeline(vk_cmd_buffers[curr_image], VK_PIPELINE_BIND_POINT_GRAPHICS, vk_ppl);
+	vkCmdDraw(vk_cmd_buffers[curr_image], vertices_size / 12, 1, 0, 0);
 
-	  ImGui_ImplVulkan_NewFrame();
-	  ImGui_ImplGlfw_NewFrame();
-	  ImGui::NewFrame();
-
-	  {
-			static float f {};
-			static int counter {};
-
-			ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
-
-			ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-			// ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-			// ImGui::Checkbox("Another Window", &show_another_window);
-
-			ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-			// ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-
-			if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-					counter++;
-			ImGui::SameLine();
-			ImGui::Text("counter = %d", counter);
-
-			// ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-			ImGui::End();
-	  }
-
-	  ImGui::Render();
-	  ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), vk_cmd_buffers[curr_image]);
-	}
-	else
-	{
-		vkCmdBindDescriptorSets(vk_cmd_buffers[curr_image], VK_PIPELINE_BIND_POINT_GRAPHICS, vk_ppl_layout, 0, 1, &vk_descr_set[0], 0, nullptr);
-
-		vkCmdBindVertexBuffers(vk_cmd_buffers[curr_image], 0, 1, &vk_vertex_buffer, &vk_vertex_buffer_offset);
-		vkCmdBeginRenderPass(vk_cmd_buffers[curr_image], &vk_render_pass_bi[curr_image], VK_SUBPASS_CONTENTS_INLINE);
-		// vkCmdBindDescriptorSets(vk_cmd_buffers[curr_image], VK_PIPELINE_BIND_POINT_GRAPHICS, vk_ppl_layout, 0, 1, &vk_descr_set[0], 0, nullptr);
-		vkCmdBindPipeline(vk_cmd_buffers[curr_image], VK_PIPELINE_BIND_POINT_GRAPHICS, vk_ppl);
-		vkCmdDraw(vk_cmd_buffers[curr_image], vertices_size / 12, 1, 0, 0);
-
-		vkCmdBindPipeline(vk_cmd_buffers[curr_image], VK_PIPELINE_BIND_POINT_GRAPHICS, vk_ppl2);
-		vkCmdDraw(vk_cmd_buffers[curr_image], 1, 1, 0, 0);
-	}
+	vkCmdBindPipeline(vk_cmd_buffers[curr_image], VK_PIPELINE_BIND_POINT_GRAPHICS, vk_ppl2);
+	vkCmdDraw(vk_cmd_buffers[curr_image], 1, 1, 0, 0);
 
 
 
@@ -198,16 +146,6 @@ void destroyVK (void)
 	loop_function = idle_function;
 
 	vkDeviceWaitIdle(vk_dev.handle);
-
-
-
-	// GUI
-	ImGui_ImplVulkan_Shutdown();
-	ImGui_ImplGlfw_Shutdown();
-	ImGui::DestroyContext();
-	//
-
-
 
 	vk_dev.destroy();
 
@@ -599,9 +537,9 @@ void initVK (void)
 
 
 
-		VkDescriptorPoolSize vk_descr_pool_size = { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 0 };
+		VkDescriptorPoolSize vk_descr_pool_size { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 0 };
 
-		VkDescriptorPool vk_descr_pool = vk_dev.DescrPool(2, 1, &vk_descr_pool_size);
+		VkDescriptorPool vk_descr_pool { vk_dev.DescrPool(2, 1, &vk_descr_pool_size) };
 
 		// VkDescriptorPool vk_descr_pool
 		// {
@@ -798,74 +736,6 @@ void initVK (void)
 		VkCommandPool vk_cmd_pool { vk_dev.CmdPool(vk_dev.graphics_queue_family_index, VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT) };
 
 		vk_cmd_buffers = vk_dev.CmdBuffer(vk_cmd_pool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, vk_swapchain_image_count);
-
-
-
-		// GUI
-		IMGUI_CHECKVERSION();
-		ImGui::CreateContext();
-		ImGui::StyleColorsDark();
-
-		// Create Descriptor Pool
-		{
-			VkDescriptorPoolSize pool_sizes []
-			{
-				{ VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
-				{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
-				{ VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },
-				{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000 },
-				{ VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000 },
-				{ VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000 },
-				{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
-				{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
-				{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000 },
-				{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
-				{ VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 }
-			};
-			VkDescriptorPoolCreateInfo pool_info {};
-			pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-			pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
-			pool_info.maxSets = 1000 * IM_ARRAYSIZE(pool_sizes);
-			pool_info.poolSizeCount = (uint32_t) IM_ARRAYSIZE(pool_sizes);
-			pool_info.pPoolSizes = pool_sizes;
-			vkCreateDescriptorPool(vk_dev.handle, &pool_info, nullptr, &g_DescriptorPool);
-		}
-
-		// Setup Platform/Renderer bindings
-		ImGui_ImplGlfw_InitForVulkan(window, true);
-		ImGui_ImplVulkan_InitInfo init_info {};
-		init_info.Instance = vk_inst.handle;
-		init_info.PhysicalDevice = vk_physical_device;
-		init_info.Device = vk_dev.handle;
-		init_info.QueueFamily = vk_dev.graphics_queue_family_index;
-		init_info.Queue = vk_graphics_queue;
-		init_info.DescriptorPool = g_DescriptorPool;
-		init_info.MinImageCount = 3;
-		init_info.ImageCount = 3;
-		init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
-		ImGui_ImplVulkan_Init(&init_info, vk_render_pass);
-
-		// Upload Fonts
-		{
-		  vkResetCommandPool(vk_dev.handle, vk_cmd_pool, 0);
-		  VkCommandBufferBeginInfo begin_info {};
-		  begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-		  begin_info.flags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-		  vkBeginCommandBuffer(vk_cmd_buffers[0], &begin_info);
-
-		  ImGui_ImplVulkan_CreateFontsTexture(vk_cmd_buffers[0]);
-
-		  VkSubmitInfo end_info {};
-		  end_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-		  end_info.commandBufferCount = 1;
-		  end_info.pCommandBuffers = &vk_cmd_buffers[0];
-		  vkEndCommandBuffer(vk_cmd_buffers[0]);
-		  vkQueueSubmit(vk_graphics_queue, 1, &end_info, VK_NULL_HANDLE);
-
-		  vkDeviceWaitIdle(vk_dev.handle);
-		  ImGui_ImplVulkan_DestroyFontUploadObjects();
-		}
-		//
 
 
 
