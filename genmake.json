@@ -48,13 +48,13 @@
 		{
 			"library": "$(REPS)/denis-belov/xgk-math/build/gcc-x64/output/a/xgk-math",
 			"watch": "$(REPS)/denis-belov/xgk-math/src",
-			"do": "/home/denis/.nvm/versions/node/v14.4.0/bin/node $(REPS)/denis-belov/c-build/src/genmake gcc-x64 $(REPS)/denis-belov/xgk-math/make.json"
+			"do": "genmake gcc-x64 $(REPS)/denis-belov/xgk-math/genmake.json"
 		},
 
 		{
 			"library": "$(REPS)/denis-belov/xgk-aux/build/gcc-x64/output/a/xgk-aux",
 			"watch": "$(REPS)/denis-belov/xgk-aux/src",
-			"do": "/home/denis/.nvm/versions/node/v14.4.0/bin/node $(REPS)/denis-belov/c-build/src/genmake gcc-x64 $(REPS)/denis-belov/xgk-aux/make.json"
+			"do": "genmake gcc-x64 $(REPS)/denis-belov/xgk-aux/genmake.json"
 		}
 	],
 
