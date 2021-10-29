@@ -1,8 +1,4 @@
 {
-	"build_type": "static",
-
-	"target_name": "xgk-test",
-
 	"variables":
 	{
 		"gcc-x64":
@@ -11,102 +7,101 @@
 			"REPS": "/home/denis/reps",
 
 			"MAKE_H": "mkdir -p $(BUILD)/h",
-			"MAKE_SPV": "mkdir -p $(BUILD)/spv",
-
-			"CUSTOM_CPPFLAGS": "-fPIC"
+			"MAKE_SPV": "mkdir -p $(BUILD)/spv"
 		}
 	},
 
-	"include_directories":
-	[
-		"$(SRC)",
-		"$(LIBS)",
-		"$(LIBS)/glad/include",
-		"$(LIBS)/glfw-3.3.4/include",
-		"$(REPS)/denis-belov",
-		"$(REPS)/denis-belov/xgk-test/build/gcc-x64/h",
-		"$(REPS)/denis-belov/xgk-math/src",
-		"$(REPS)/denis-belov/xgk-aux/src"
-	],
-
-	"system_libraries":
-	[
-		"dl",
-		"pthread",
-		"X11",
-		"Xrandr",
-		"Xxf86vm",
-		"Xi",
-		"Xinerama",
-		"Xcursor"
-	],
-
-	"static_libraries":
-	[
-		"$(LIBS)/glfw-3.3.4/build/src/libglfw3",
-
-		{
-			"library": "$(REPS)/denis-belov/xgk-math/build/gcc-x64/output/a/xgk-math",
-			"watch": "$(REPS)/denis-belov/xgk-math/src",
-			"do": "genmake gcc-x64 $(REPS)/denis-belov/xgk-math/genmake.json"
-		},
-
-		{
-			"library": "$(REPS)/denis-belov/xgk-aux/build/gcc-x64/output/a/xgk-aux",
-			"watch": "$(REPS)/denis-belov/xgk-aux/src",
-			"do": "genmake gcc-x64 $(REPS)/denis-belov/xgk-aux/genmake.json"
-		}
-	],
-
-	"source_files":
+	"entries":
 	{
-		"internal":
-		{
-			"cpp":
-			[
-				"$(SRC)/xgk-test.cpp",
+		"type": "static",
 
-				"$(SRC)/gl.cpp",
+		"name": "xgk-test",
 
-				{
-					"source": "$(SRC)/vk.cpp",
+		"flags_additional": "-fPIC",
 
-					"headers":
-					[
-						"$(REPS)/denis-belov/xgk-aux/src/api/vulkan.h",
-						"$(BUILD)/h/vertex_shader_code_vulkan.h",
-						"$(BUILD)/h/fragment_shader_code_vulkan.h"
-					],
+		"include_directories":
+		[
+			"$(SRC)",
+			"$(LIBS)",
+			"$(LIBS)/glad/include",
+			"$(LIBS)/glfw-3.3.4/include",
+			"$(REPS)/denis-belov",
+			"$(REPS)/denis-belov/xgk-test/build/$(ENV)/h",
+			"$(REPS)/denis-belov/xgk-math/src",
+			"$(REPS)/denis-belov/xgk-aux/src"
+		],
 
-					"custom_dependencies":
-					[
+		"system_libraries":
+		[
+			"dl",
+			"pthread",
+			"X11",
+			"Xrandr",
+			"Xxf86vm",
+			"Xi",
+			"Xinerama",
+			"Xcursor"
+		],
+
+		"watch_files":
+		[
+			"$(SRC)/xgk-test.cpp",
+
+			"$(SRC)/gl.cpp",
+
+			{
+				"file": "$(SRC)/vk.cpp",
+
+				"watch_files":
+				[
+					"$(REPS)/denis-belov/xgk-aux/src/api/vulkan.h",
+
+					{
+						"file": "$(BUILD)/h/vertex_shader_code_vulkan.h",
+
+						"watch_files": "$(SRC)/vk-shaders/vertex_shader_code_vulkan.vert",
+
+						"do":
 						[
-							"$(BUILD)/h/vertex_shader_code_vulkan.h : $(SRC)/vk-shaders/vertex_shader_code_vulkan.vert\n",
-							"\t$(MAKE_SPV) && $(MAKE_H) && ",
+							"$(MAKE_SPV) && $(MAKE_H) && ",
 							"glslangValidator -o $(BUILD)/spv/vertex_shader_code_vulkan.spv $(SRC)/vk-shaders/vertex_shader_code_vulkan.vert -V -t && ",
 							"node $(REPS)/denis-belov/c-build/src/spv2h $(BUILD)/spv/vertex_shader_code_vulkan.spv $(BUILD)/h/vertex_shader_code_vulkan.h vertex_shader_code_vulkan"
-						],
+						]
+					},
 
+					{
+						"file": "$(BUILD)/h/fragment_shader_code_vulkan.h",
+
+						"watch_files": "$(SRC)/vk-shaders/fragment_shader_code_vulkan.frag",
+
+						"do":
 						[
-							"$(BUILD)/h/fragment_shader_code_vulkan.h : $(SRC)/vk-shaders/fragment_shader_code_vulkan.frag\n",
-							"\t$(MAKE_SPV) && $(MAKE_H) && ",
+							"$(MAKE_SPV) && $(MAKE_H) && ",
 							"glslangValidator -o $(BUILD)/spv/fragment_shader_code_vulkan.spv $(SRC)/vk-shaders/fragment_shader_code_vulkan.frag -V -t && ",
 							"node $(REPS)/denis-belov/c-build/src/spv2h $(BUILD)/spv/fragment_shader_code_vulkan.spv $(BUILD)/h/fragment_shader_code_vulkan.h fragment_shader_code_vulkan"
 						]
-					]
-				}
-			]
-		},
+					}
+				]
+			},
 
-		"external":
-		{
-			"cpp":
-			[
-				{
-					"source": "$(LIBS)/glad/src/glad.c",
-					"flags": "-w $(CUSTOM_CPPFLAGS)"
-				}
-			]
-		}
+			{
+				"file": "$(LIBS)/glad/src/glad.c",
+				"flags_additional": "-w"
+			},
+
+			{
+				"file": "$(REPS)/denis-belov/xgk-math/build/$(ENV)/output/a/xgk-math.$(LIB_EXT)",
+				"watch_directories": "$(REPS)/denis-belov/xgk-math/src",
+				"do": "genmake $(ENV) $(REPS)/denis-belov/xgk-math/genmake.json"
+			},
+
+			{
+				"file": "$(REPS)/denis-belov/xgk-aux/build/$(ENV)/output/a/xgk-aux.$(LIB_EXT)",
+				"watch_directories": "$(REPS)/denis-belov/xgk-aux/src",
+				"do": "genmake $(ENV) $(REPS)/denis-belov/xgk-aux/genmake.json"
+			},
+
+			"$(LIBS)/glfw-3.3.4/build/src/libglfw3.$(LIB_EXT)"
+		]
 	}
 }
