@@ -13,7 +13,7 @@
 
 	"entries":
 	{
-		"type": "static",
+		"type": "bin",
 
 		"name": "xgk-test",
 
@@ -64,8 +64,8 @@
 						"do":
 						[
 							"$(MAKE_SPV) && $(MAKE_H) && ",
-							"glslangValidator -o $(BUILD)/spv/vertex_shader_code_vulkan.spv $(SRC)/vk-shaders/vertex_shader_code_vulkan.vert -V -t && ",
-							"node $(REPS)/denis-belov/c-build/src/spv2h $(BUILD)/spv/vertex_shader_code_vulkan.spv $(BUILD)/h/vertex_shader_code_vulkan.h vertex_shader_code_vulkan"
+							"glslangValidator $(SRC)/vk-shaders/vertex_shader_code_vulkan.vert -V -t -o $(BUILD)/spv/vertex_shader_code_vulkan.spv && ",
+							"spv2uint32 $(BUILD)/spv/vertex_shader_code_vulkan.spv $(BUILD)/h/vertex_shader_code_vulkan.h"
 						]
 					},
 
@@ -77,8 +77,8 @@
 						"do":
 						[
 							"$(MAKE_SPV) && $(MAKE_H) && ",
-							"glslangValidator -o $(BUILD)/spv/fragment_shader_code_vulkan.spv $(SRC)/vk-shaders/fragment_shader_code_vulkan.frag -V -t && ",
-							"node $(REPS)/denis-belov/c-build/src/spv2h $(BUILD)/spv/fragment_shader_code_vulkan.spv $(BUILD)/h/fragment_shader_code_vulkan.h fragment_shader_code_vulkan"
+							"glslangValidator $(SRC)/vk-shaders/fragment_shader_code_vulkan.frag -V -t -o $(BUILD)/spv/fragment_shader_code_vulkan.spv && ",
+							"spv2uint32 $(BUILD)/spv/fragment_shader_code_vulkan.spv $(BUILD)/h/fragment_shader_code_vulkan.h"
 						]
 					}
 				]
@@ -90,13 +90,13 @@
 			},
 
 			{
-				"file": "$(REPS)/denis-belov/xgk-math/build/$(ENV)/output/a/xgk-math.$(LIB_EXT)",
+				"file": "$(REPS)/denis-belov/xgk-math/build/$(ENV)/output/$(LIB_EXT)/xgk-math.$(LIB_EXT)",
 				"watch_directories": "$(REPS)/denis-belov/xgk-math/src",
 				"do": "genmake $(ENV) $(REPS)/denis-belov/xgk-math/genmake.json"
 			},
 
 			{
-				"file": "$(REPS)/denis-belov/xgk-aux/build/$(ENV)/output/a/xgk-aux.$(LIB_EXT)",
+				"file": "$(REPS)/denis-belov/xgk-aux/build/$(ENV)/output/$(LIB_EXT)/xgk-aux.$(LIB_EXT)",
 				"watch_directories": "$(REPS)/denis-belov/xgk-aux/src",
 				"do": "genmake $(ENV) $(REPS)/denis-belov/xgk-aux/genmake.json"
 			},

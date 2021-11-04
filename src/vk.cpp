@@ -26,18 +26,29 @@
 
 #include "xgk-aux/src/api/vulkan.h"
 
-#if defined(__GNUC__)
-	#include "vertex_shader_code_vulkan.h"
-	#include "fragment_shader_code_vulkan.h"
-#else
-	#include "vertex_shader_code_vulkan.h"
-	#include "fragment_shader_code_vulkan.h"
-#endif
+// #if defined(__GNUC__)
+// 	#include "vertex_shader_code_vulkan.h"
+// 	#include "fragment_shader_code_vulkan.h"
+// #else
+// 	#include "vertex_shader_code_vulkan.h"
+// 	#include "fragment_shader_code_vulkan.h"
+// #endif
 
 
 
 using std::cout;
 using std::endl;
+
+
+
+const uint32_t vertex_shader_code_vulkan []
+{
+	#include "vertex_shader_code_vulkan.h"
+};
+const uint32_t fragment_shader_code_vulkan []
+{
+	#include "fragment_shader_code_vulkan.h"
+};
 
 
 
